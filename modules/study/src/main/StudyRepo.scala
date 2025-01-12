@@ -1,13 +1,14 @@
 package lila.study
 
 import akka.stream.scaladsl.*
-import reactivemongo.akkastream.{ cursorProducer, AkkaStreamCursor }
+import reactivemongo.akkastream.{ AkkaStreamCursor, cursorProducer }
 import reactivemongo.api.*
+import reactivemongo.api.bson.BSONDocument
 
+import lila.core.study as hub
+import lila.core.study.Visibility
 import lila.db.AsyncColl
 import lila.db.dsl.{ *, given }
-import lila.user.User
-import reactivemongo.api.bson.BSONDocument
 
 final class StudyRepo(private[study] val coll: AsyncColl)(using
     Executor,
@@ -79,27 +80,36 @@ final class StudyRepo(private[study] val coll: AsyncColl)(using
 
   def lookup(local: String) = $lookup.simple(coll, "study", local, "_id")
 
-  private[study] def selectOwnerId(ownerId: UserId)   = $doc("ownerId" -> ownerId)
-  private[study] def selectMemberId(memberId: UserId) = $doc(F.uids -> memberId)
-  private[study] val selectPublic = $doc(
-    "visibility" -> (Study.Visibility.Public: Study.Visibility)
-  )
+  private[study] def selectOwnerId(ownerId: UserId) = $doc("ownerId" -> ownerId)
+  def selectMemberId(memberId: UserId)              = $doc(F.uids -> memberId)
+  private[study] val selectPublic = $doc:
+    "visibility" -> (Visibility.public: Visibility)
   private[study] val selectPrivateOrUnlisted =
-    "visibility" $ne (Study.Visibility.Public: Study.Visibility)
+    "visibility".$ne(Visibility.public: Visibility)
   private[study] def selectLiker(userId: UserId) = $doc(F.likers -> userId)
   private[study] def selectContributorId(userId: UserId): BSONDocument =
     selectMemberId(userId) ++ // use the index
-      $doc("ownerId" $ne userId) ++
+      $doc("ownerId".$ne(userId)) ++
       $doc(s"members.$userId.role" -> "w")
   private[study] def selectTopic(topic: StudyTopic) = $doc(F.topics -> topic)
+  def selectBroadcast                               = selectTopic(StudyTopic.broadcast)
+  private[study] def selectNotBroadcast             = $doc(F.topics.$ne(StudyTopic.broadcast))
 
   def countByOwner(ownerId: UserId) = coll(_.countSel(selectOwnerId(ownerId)))
 
   def sourceByOwner(ownerId: UserId, isMe: Boolean): Source[Study, ?] =
     Source.futureSource:
       coll.map:
-        _.find(selectOwnerId(ownerId) ++ (!isMe so selectPublic))
-          .sort($sort desc "updatedAt")
+        _.find(selectOwnerId(ownerId) ++ (!isMe).so(selectPublic))
+          .sort($sort.desc("updatedAt"))
+          .cursor[Study]()
+          .documentSource()
+
+  def sourceByMember(memberId: UserId, isMe: Boolean, select: Bdoc = $empty): Source[Study, ?] =
+    Source.futureSource:
+      coll.map:
+        _.find(selectMemberId(memberId) ++ select ++ (!isMe).so(selectPublic))
+          .sort($sort.desc("rank"))
           .cursor[Study]()
           .documentSource()
 
@@ -114,17 +124,19 @@ final class StudyRepo(private[study] val coll: AsyncColl)(using
     .void
 
   def updateSomeFields(s: Study): Funit =
+    import toBSONValueOption.given
     coll:
       _.update
         .one(
           $id(s.id),
-          $set(
-            "position"    -> s.position,
-            "name"        -> s.name,
-            "settings"    -> s.settings,
-            "visibility"  -> s.visibility,
-            "description" -> ~s.description,
-            "updatedAt"   -> nowInstant
+          $setsAndUnsets(
+            "position"    -> s.position.some,
+            "name"        -> s.name.some,
+            "flair"       -> s.flair,
+            "settings"    -> s.settings.some,
+            "visibility"  -> s.visibility.some,
+            "description" -> s.description,
+            "updatedAt"   -> nowInstant.some
           )
         )
     .void
@@ -161,7 +173,10 @@ final class StudyRepo(private[study] val coll: AsyncColl)(using
     .void
 
   def updateNow(s: Study): Funit =
-    coll.map(_.updateFieldUnchecked($id(s.id), "updatedAt", nowInstant))
+    updateNow(s.id)
+
+  def updateNow(id: StudyId): Funit =
+    coll.map(_.updateFieldUnchecked($id(id), "updatedAt", nowInstant))
 
   def addMember(study: Study, member: StudyMember): Funit =
     coll:
@@ -190,31 +205,43 @@ final class StudyRepo(private[study] val coll: AsyncColl)(using
         )
     .void
 
-  def uids(studyId: StudyId): Fu[Set[UserId]] =
-    coll(_.primitiveOne[Set[UserId]]($id(studyId), F.uids)).dmap(~_)
+  def membersDoc(id: StudyId): Fu[Option[Bdoc]] =
+    coll(_.primitiveOne[Bdoc]($id(id), "members"))
+
+  def setMembersDoc(ids: Seq[StudyId], members: Bdoc): Funit =
+    coll(
+      _.update.one(
+        $inIds(ids),
+        $set(
+          "members" -> members,
+          "uids"    -> members.toMap.keys
+        ),
+        multi = true
+      )
+    ).void
 
   private val idNameProjection = $doc("name" -> true)
 
-  def publicIdNames(ids: List[StudyId]): Fu[List[Study.IdName]] =
-    coll(_.find($inIds(ids) ++ selectPublic, idNameProjection.some).cursor[Study.IdName]().listAll())
+  def publicIdNames(ids: List[StudyId]): Fu[List[hub.IdName]] =
+    coll(_.find($inIds(ids) ++ selectPublic, idNameProjection.some).cursor[hub.IdName]().listAll())
 
   def recentByOwnerWithChapterCount(
       chapterColl: AsyncColl
-  )(userId: UserId, nb: Int): Fu[List[(Study.IdName, Int)]] =
+  )(userId: UserId, nb: Int): Fu[List[(hub.IdName, Int)]] =
     findRecentStudyWithChapterCount(selectOwnerId)(chapterColl)(userId, nb)
 
   def recentByContributorWithChapterCount(
       chapterColl: AsyncColl
-  )(userId: UserId, nb: Int): Fu[List[(Study.IdName, Int)]] =
+  )(userId: UserId, nb: Int): Fu[List[(hub.IdName, Int)]] =
     findRecentStudyWithChapterCount(selectContributorId)(chapterColl)(userId, nb)
 
   private def findRecentStudyWithChapterCount(query: UserId => BSONDocument)(
       chapterColl: AsyncColl
   )(userId: UserId, nb: Int) =
     coll:
-      _.aggregateList(nb) { framework =>
+      _.aggregateList(nb): framework =>
         import framework.*
-        Match(query(userId)) -> List(
+        Match(query(userId) ++ selectNotBroadcast) -> List(
           Sort(Descending("updatedAt")),
           Project(idNameProjection),
           PipelineOperator(
@@ -228,42 +255,45 @@ final class StudyRepo(private[study] val coll: AsyncColl)(using
           ),
           AddFields($doc("chapters" -> $doc("$size" -> "$chapters")))
         )
-      }
-        .map: docs =>
-          for
-            doc        <- docs
-            idName     <- idNameHandler.readOpt(doc)
-            nbChapters <- doc.int("chapters")
-          yield (idName, nbChapters)
+      .map: docs =>
+        for
+          doc        <- docs
+          idName     <- studyIdNameHandler.readOpt(doc)
+          nbChapters <- doc.int("chapters")
+        yield (idName, nbChapters)
 
   def isContributor(studyId: StudyId, userId: UserId) =
     coll(_.exists($id(studyId) ++ $doc(s"members.$userId.role" -> "w")))
 
   def isMember(studyId: StudyId, userId: UserId) =
-    coll(_.exists($id(studyId) ++ (s"members.$userId" $exists true)))
+    coll(_.exists($id(studyId) ++ (s"members.$userId".$exists(true))))
 
-  def like(studyId: StudyId, userId: UserId, v: Boolean): Fu[Study.Likes] =
-    coll: c =>
-      c.update.one($id(studyId), if v then $addToSet(F.likers -> userId) else $pull(F.likers -> userId)) >> {
-        countLikes(studyId).flatMap:
-          case None                     => fuccess(Study.Likes(0))
-          case Some((likes, createdAt)) =>
-            // Multiple updates may race to set denormalized likes and rank,
-            // but values should be approximately correct, match a real like
-            // count (though perhaps not the latest one), and any uncontended
-            // query will set the precisely correct value.
-            c.update.one(
-              $id(studyId),
-              $set(F.likes -> likes, F.rank -> Study.Rank.compute(likes, createdAt))
-            ) inject likes
-      }
+  def like(studyId: StudyId, userId: UserId, v: Boolean): Fu[Study.Likes] = for
+    c <- coll.get
+    _ <- c.update.one($id(studyId), if v then $addToSet(F.likers -> userId) else $pull(F.likers -> userId))
+    likes <- countLikes(studyId)
+    updated <- likes match
+      case None                     => fuccess(Study.Likes(0))
+      case Some((likes, createdAt)) =>
+        // Multiple updates may race to set denormalized likes and rank,
+        // but values should be approximately correct, match a real like
+        // count (though perhaps not the latest one), and any uncontended
+        // query will set the precisely correct value.
+        c.update
+          .one(
+            $id(studyId),
+            $set(F.likes -> likes, F.rank -> Study.Rank.compute(likes, createdAt))
+          )
+          .inject(likes)
+  yield updated
 
   def liked(study: Study, user: User): Fu[Boolean] =
     coll(_.exists($id(study.id) ++ selectLiker(user.id)))
 
   def filterLiked(user: User, studyIds: Seq[StudyId]): Fu[Set[StudyId]] =
-    studyIds.nonEmpty so
+    studyIds.nonEmpty.so(
       coll(_.primitive[StudyId]($inIds(studyIds) ++ selectLiker(user.id), "_id").dmap(_.toSet))
+    )
 
   def resetAllRanks: Fu[Int] =
     coll:
@@ -272,8 +302,8 @@ final class StudyRepo(private[study] val coll: AsyncColl)(using
         $doc(F.likes -> true, F.createdAt -> true).some
       )
         .cursor[Bdoc]()
-        .foldWhileM(0) { (count, doc) =>
-          ~(for
+        .foldWhileM(0): (count, doc) =>
+          (for
             id        <- doc.getAsOpt[StudyId]("_id")
             likes     <- doc.getAsOpt[Study.Likes](F.likes)
             createdAt <- doc.getAsOpt[Instant](F.createdAt)
@@ -283,8 +313,8 @@ final class StudyRepo(private[study] val coll: AsyncColl)(using
                 $id(id),
                 $set(F.rank -> Study.Rank.compute(likes, createdAt))
               )
-          .void) inject Cursor.Cont(count + 1)
-        }
+              .void
+          ).orZero.inject(Cursor.Cont(count + 1))
 
   private[study] def isAdminMember(study: Study, userId: UserId): Fu[Boolean] =
     coll(_.exists($id(study.id) ++ $doc(s"members.$userId.admin" -> true)))

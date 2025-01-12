@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="playWithAFriend">Jucaţi cu un prieten</string>
+  <string name="playWithAFriend">Jucați cu un prieten</string>
   <string name="playWithTheMachine">Jucați cu calculatorul</string>
   <string name="toInviteSomeoneToPlayGiveThisUrl">Pentru a invita pe cineva să joace, folosiți acest URL</string>
   <string name="gameOver">Partidă încheiată</string>
   <string name="waitingForOpponent">Se așteaptă adversarul</string>
+  <string name="orLetYourOpponentScanQrCode">Sau lăsați adversarul să scaneze acest cod QR</string>
   <string name="waiting">Se așteaptă</string>
   <string name="yourTurn">Rândul tău</string>
   <string name="aiNameLevelAiLevel">%1$s nivel %2$s</string>
@@ -12,13 +13,13 @@
   <string name="strength">Putere</string>
   <string name="toggleTheChat">Arată/Ascunde discuţia</string>
   <string name="chat">Discuţie</string>
-  <string name="resign">Abandonează</string>
+  <string name="resign">Renunță</string>
   <string name="checkmate">Şah mat</string>
   <string name="stalemate">Pat</string>
   <string name="white">Alb</string>
   <string name="black">Negru</string>
   <string name="asWhite">cu albele</string>
-  <string name="asBlack">cu negrele</string>
+  <string name="asBlack">ca negrul</string>
   <string name="randomColor">Culoare aleatorie</string>
   <string name="createAGame">Creează un joc</string>
   <string name="whiteIsVictorious">Albul a câștigat</string>
@@ -56,7 +57,7 @@
   <string name="computerAnalysis">Analiza computer-ului</string>
   <string name="computerAnalysisAvailable">Analiză computerizată disponibilă</string>
   <string name="computerAnalysisDisabled">Analiză computerizată dezactivată</string>
-  <string name="analysis">Analiză</string>
+  <string name="analysis">Tablă de analiză</string>
   <string name="depthX">Profunzime %s</string>
   <string name="usingServerAnalysis">Utilizează analiză de server</string>
   <string name="loadingEngine">Se încarcă motorul de analiză...</string>
@@ -70,7 +71,10 @@
   <string name="promoteVariation">Promovează variația</string>
   <string name="makeMainLine">Fă-o variația principală</string>
   <string name="deleteFromHere">Șterge de aici</string>
+  <string name="collapseVariations">Restrânge variațiile</string>
+  <string name="expandVariations">Extinde variațiile</string>
   <string name="forceVariation">Forțează variația</string>
+  <string name="copyVariationPgn">Copiază varianta PGN</string>
   <string name="move">Mutare</string>
   <string name="variantLoss">Variantă pierdere</string>
   <string name="variantWin">Variantă câștig</string>
@@ -101,6 +105,7 @@
   <string name="openingExplorer">Exploratorul de deschideri</string>
   <string name="openingEndgameExplorer">Explorator de deschideri/finaluri de joc</string>
   <string name="xOpeningExplorer">Exploratorul de deschideri %s</string>
+  <string name="playFirstOpeningEndgameExplorerMove">Joacă prima mutare de deschidere/final de joc-explorator</string>
   <string name="winPreventedBy50MoveRule">Victoria partidei a fost împiedicată de regula celor 50 de mutări</string>
   <string name="lossSavedBy50MoveRule">Pierderea partidei a fost împiedicată de regula celor 50 de mutări</string>
   <string name="winOr50MovesByPriorMistake">Câștig sau remiză la 50 de mutări din cauza unei greșeli anterioare</string>
@@ -113,9 +118,9 @@
   <string name="replayMode">Modul de reluare</string>
   <string name="realtimeReplay">În timp real</string>
   <string name="byCPL">După CPL</string>
-  <string name="openStudy">Studiu deschis</string>
   <string name="enable">Activează</string>
   <string name="bestMoveArrow">Săgeată pentru cea mai bună mutare</string>
+  <string name="showVariationArrows">Afișează săgețile variației</string>
   <string name="evaluationGauge">Indicator de evaluare</string>
   <string name="multipleLines">Mutări multiple</string>
   <string name="cpus">Procesoare</string>
@@ -130,15 +135,30 @@
     <item quantity="few">%s gafe</item>
     <item quantity="other">%s de gafe</item>
   </plurals>
+  <plurals name="numberBlunders" comment="Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;blunder&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;Blunder&quot; from another string, so please update as required.">
+    <item quantity="one">%s Gafă</item>
+    <item quantity="few">%s Gafe</item>
+    <item quantity="other">%s De gafe</item>
+  </plurals>
   <plurals name="nbMistakes">
     <item quantity="one">%s greșeală</item>
     <item quantity="few">%s greșeli</item>
     <item quantity="other">%s de greșeli</item>
   </plurals>
+  <plurals name="numberMistakes" comment="Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;mistake&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;mistake&quot; from another string, so please update as required.">
+    <item quantity="one">%s Greșeală</item>
+    <item quantity="few">%s Greșeli</item>
+    <item quantity="other">%s De greșeli</item>
+  </plurals>
   <plurals name="nbInaccuracies">
     <item quantity="one">%s inexactitate</item>
     <item quantity="few">%s inexactități</item>
     <item quantity="other">%s de inexactități</item>
+  </plurals>
+  <plurals name="numberInaccuracies" comment="Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;inaccuracy&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;Inaccuracy&quot; from another string, so please update as required.">
+    <item quantity="one">%s Inexactitate</item>
+    <item quantity="few">%s Inexactități</item>
+    <item quantity="other">%s De inexactități</item>
   </plurals>
   <string name="moveTimes">Timpii de mutare</string>
   <string name="flipBoard">Rotiţi tabla</string>
@@ -149,7 +169,7 @@
   <plurals name="nbPlayers">
     <item quantity="one">%s jucător</item>
     <item quantity="few">%s jucători</item>
-    <item quantity="other">%s jucători</item>
+    <item quantity="other">%s de jucători</item>
   </plurals>
   <string name="drawByMutualAgreement">Remiză prin acord reciproc</string>
   <string name="fiftyMovesWithoutProgress">Cincizeci de mișcări fără progres</string>
@@ -157,7 +177,7 @@
   <plurals name="nbGames">
     <item quantity="one">%s partidă</item>
     <item quantity="few">%s partide</item>
-    <item quantity="other">%s partide</item>
+    <item quantity="other">%s de partide</item>
   </plurals>
   <plurals name="ratingXOverYGames">
     <item quantity="one">Rating %1$s din %2$s meci</item>
@@ -182,6 +202,7 @@
   <string name="latestForumPosts">Ultimele postări pe forum</string>
   <string name="players">Jucători</string>
   <string name="friends">Prieteni</string>
+  <string name="otherPlayers">alți jucători</string>
   <string name="discussions">Discuții</string>
   <string name="today">Astăzi</string>
   <string name="yesterday">Ieri</string>
@@ -196,12 +217,12 @@
   <plurals name="nbDays">
     <item quantity="one">%s zi</item>
     <item quantity="few">%s zile</item>
-    <item quantity="other">%s zile</item>
+    <item quantity="other">%s de zile</item>
   </plurals>
   <plurals name="nbHours">
     <item quantity="one">%s oră</item>
     <item quantity="few">%s ore</item>
-    <item quantity="other">%s ore</item>
+    <item quantity="other">%s de ore</item>
   </plurals>
   <plurals name="nbMinutes">
     <item quantity="one">%s minut</item>
@@ -267,6 +288,7 @@
     <item quantity="few">%s partide cu tine</item>
     <item quantity="other">%s partide cu tine</item>
   </plurals>
+  <string name="ok">OK</string>
   <string name="cancel">Anulare</string>
   <string name="whiteTimeOut">Timpul pentru alb a expirat</string>
   <string name="blackTimeOut">Timpul pentru negru a expirat</string>
@@ -283,10 +305,10 @@
   <string name="playingRightNow">În desfășurare...</string>
   <string name="eventInProgress">În desfășurare</string>
   <string name="finished">Terminat</string>
-  <string name="finishesX">se termină %s</string>
   <string name="abortGame">Abandonați partida</string>
   <string name="gameAborted">Partidă abandonată</string>
   <string name="standard">Standard</string>
+  <string name="customPosition">Poziție personalizată</string>
   <string name="unlimited">Nelimitat</string>
   <string name="mode">Mod</string>
   <string name="casual">Amical</string>
@@ -321,17 +343,17 @@
   <plurals name="nbWins">
     <item quantity="one">%s victorie</item>
     <item quantity="few">%s victorii</item>
-    <item quantity="other">%s victorii</item>
+    <item quantity="other">%s de victorii</item>
   </plurals>
   <plurals name="nbLosses">
     <item quantity="one">%s înfrângere</item>
     <item quantity="few">%s înfrângeri</item>
-    <item quantity="other">%s înfrângeri</item>
+    <item quantity="other">%s de înfrângeri</item>
   </plurals>
   <plurals name="nbDraws">
     <item quantity="one">%s remiză</item>
     <item quantity="few">%s remize</item>
-    <item quantity="other">%s remize</item>
+    <item quantity="other">%s de remize</item>
   </plurals>
   <plurals name="nbPlaying">
     <item quantity="one">%s îl joacă</item>
@@ -366,7 +388,12 @@
   <plurals name="nbStudies">
     <item quantity="one">%s studiu</item>
     <item quantity="few">%s studii</item>
-    <item quantity="other">%s studii</item>
+    <item quantity="other">%s de studii</item>
+  </plurals>
+  <plurals name="nbSimuls">
+    <item quantity="one">%s simul</item>
+    <item quantity="few">%s simul</item>
+    <item quantity="other">%s simul</item>
   </plurals>
   <string name="viewTournament">Vizualizați turneul</string>
   <string name="backToTournament">Înapoi la turneu</string>
@@ -424,6 +451,7 @@
   <string name="importGame">Importați partida</string>
   <string name="importGameExplanation">Copiați o partidă în format PGN pentru a putea apoi sa o rejucati, sa cereti o analiză a computerului, sa folositi functia de chat și sa obtineti un URL pentru distribuire.</string>
   <string name="importGameCaveat">Variațiile vor fi șterse. Pentru a le păstra, importați PGN-ul printr-un studiu.</string>
+  <string name="importGameDataPrivacyWarning">Acest PGN poate fi accesat public. Pentru a importa un joc în mod privat, folosește un studiu.</string>
   <plurals name="nbImportedGames">
     <item quantity="one">%s partidă importată</item>
     <item quantity="few">%s partide importate</item>
@@ -437,6 +465,7 @@
   <string name="blackCheckmatesInOneMove">Negrele să dea șah mat într-o mutare</string>
   <string name="retry">Mai încercați</string>
   <string name="reconnecting">Se reconectează</string>
+  <string name="noNetwork">Deconectat</string>
   <plurals name="nbFriendsOnline">
     <item quantity="one">%s prieten online</item>
     <item quantity="few">%s prieteni online</item>
@@ -451,7 +480,6 @@
   <string name="block">Blocare</string>
   <string name="blocked">Blocat</string>
   <string name="unblock">Deblocare</string>
-  <string name="followsYou">Vă urmărește</string>
   <string name="xStartedFollowingY">%1$s a început să vă urmărească %2$s</string>
   <plurals name="nbFollowers">
     <item quantity="one">%s urmăritor</item>
@@ -486,9 +514,6 @@
   <string name="safeTournamentName">Alege un nume foarte sigur pentru turneu.</string>
   <string name="inappropriateNameWarning">Orice nume care este chiar și ușor nepotrivit poate cauza închiderea contului tău.</string>
   <string name="emptyTournamentName">Lăsați necompletat pentru a numi turneul după un jucător bun de șah.</string>
-  <string name="recommendNotTouching">Iți recomandăm să nu modifici aceste setări.</string>
-  <string name="fewerPlayers">Dacă stabilești condiții de intrare, turneul tău va avea mai puțini jucători.</string>
-  <string name="showAdvancedSettings">Afișează setările avansate</string>
   <string name="makePrivateTournament">Faceți competiția privată și restricționați accesul cu o parolă</string>
   <string name="join">Intră</string>
   <string name="withdraw">Retrage-te</string>
@@ -509,6 +534,7 @@
   <string name="movesPlayed">Mutări jucate</string>
   <string name="whiteWins">Albul câștigă</string>
   <string name="blackWins">Negrul câștigă</string>
+  <string name="drawRate">Rata de remiză</string>
   <string name="draws">Remize</string>
   <string name="nextXTournament">Următorul turneu %s:</string>
   <string name="averageOpponent">Cota medie a adversarilor</string>
@@ -527,9 +553,12 @@
   <string name="ifNoneLeaveEmpty">Dacă nu există, nu completați</string>
   <string name="profile">Profil</string>
   <string name="editProfile">Editează profilul</string>
-  <string name="firstName">Prenume</string>
-  <string name="lastName">Nume</string>
+  <string name="realName">Nume real</string>
+  <string name="setFlair">Arată-ți stilul</string>
+  <string name="flair">Pictograma personalizată</string>
+  <string name="youCanHideFlair">Există o setare pentru a ascunde flair-ul utilizatorilor pe întregului site.</string>
   <string name="biography">Biografie</string>
+  <string name="countryRegion" comment="flag&#10;Appears when you edit your profile. Lets a player add a country/flag (not all flags are for countries) to their profile">Țara sau regiunea</string>
   <string name="thankYou">Mulţumesc!</string>
   <string name="socialMediaLinks">Link-urile rețelelor de socializare</string>
   <string name="oneUrlPerLine">Un URL pe linie.</string>
@@ -544,18 +573,20 @@
   <plurals name="nbGamesInPlay">
     <item quantity="one">%s partidă în desfășurare</item>
     <item quantity="few">%s partide în desfășurare</item>
-    <item quantity="other">%s partide în desfășurare</item>
+    <item quantity="other">%s de partide în desfășurare</item>
   </plurals>
   <string name="automaticallyProceedToNextGameAfterMoving">Du-te automat la partida următoare după mutare</string>
   <string name="autoSwitch">Schimbă automat</string>
   <string name="puzzles">Probleme de șah</string>
-  <string name="tournamentWinners">Câștigători de turnee</string>
+  <string name="onlineBots">Boți online</string>
   <string name="name">Nume</string>
   <string name="description">Descriere</string>
   <string name="descPrivate">Descriere privată</string>
   <string name="descPrivateHelp">Text pe care îl vor vedea doar membrii echipei. Dacă este setat, înlocuiește descrierea publică pentru membrii echipei.</string>
   <string name="no">Nu</string>
   <string name="yes">Da</string>
+  <string name="website">Pagină web</string>
+  <string name="mobile">Mobil</string>
   <string name="help">Ajutor:</string>
   <string name="createANewTopic">Creează un nou topic</string>
   <string name="topics">Subiecte</string>
@@ -572,11 +603,11 @@
   <string name="reason">Motiv</string>
   <string name="whatIsIheMatter">Care este problema?</string>
   <string name="cheat">Trișează</string>
-  <string name="insult">Insultă</string>
   <string name="troll">Troll</string>
-  <string name="ratingManipulation">Manipularea evaluării</string>
   <string name="other">Altceva</string>
-  <string name="reportDescriptionHelp">Adaugă link-ul de la joc(uri) și arată ce este greșit cu privire la acest comportament al utilizatorului. Nu preciza doar ”trișează”, ci spune-ne cum ai ajuns la această concluzie. Raportul tău va fi procesat mai rapid dacă este scris în engleză.</string>
+  <string name="reportCheatBoostHelp">Adaugă link-ul de la joc(uri) și arată ce este greșit cu privire la acest comportament al utilizatorului. Nu preciza doar \"trișează\", ci spune-ne cum ai ajuns la această concluzie.</string>
+  <string name="reportUsernameHelp">Explică de ce acest nume de utilizator este jignitor. Nu spune doar \"e ofensiv/inadecvat\", ci spune-ne cum ai ajuns la această concluzie, mai ales în cazul în care insulta este obscură, nu este în engleză, este jargon sau este o referință istorică/culturală.</string>
+  <string name="reportProcessedFasterInEnglish">Raportul tău va fi procesat mai rapid dacă este scris în engleză.</string>
   <string name="error.provideOneCheatedGameLink">Te rugăm să furnizezi cel puțin un link către un joc în care s-a trișat.</string>
   <string name="by">de %s</string>
   <string name="importedByX">Importat de %s</string>
@@ -609,6 +640,7 @@
   <string name="slow">Lentă</string>
   <string name="insideTheBoard">Pe interiorul tablei</string>
   <string name="outsideTheBoard">În afara tablei</string>
+  <string name="allSquaresOfTheBoard">Toate pătratele de pe tablă</string>
   <string name="onSlowGames">În jocurile lente</string>
   <string name="always">Întotdeauna</string>
   <string name="never">Niciodată</string>
@@ -665,7 +697,7 @@
   <plurals name="nbForumPosts">
     <item quantity="one">%s postare pe forum</item>
     <item quantity="few">%s postări pe forum</item>
-    <item quantity="other">%s postări pe forum</item>
+    <item quantity="other">%s de postări pe forum</item>
   </plurals>
   <string name="tpTimeSpentPlaying">Timp petrecut jucând: %s</string>
   <string name="watchGames">Vezi partide</string>
@@ -685,8 +717,10 @@
   <string name="simultaneousExhibitions">Simultane de șah</string>
   <string name="host">Gazdă</string>
   <string name="hostColorX">Culoarea gazdei: %s</string>
+  <string name="yourPendingSimuls">Simultanele tale în așteptare</string>
   <string name="createdSimuls">Simultan nou creat</string>
   <string name="hostANewSimul">Găzduiește un nou simultan</string>
+  <string name="signUpToHostOrJoinASimul">Înregistrează-te pentru a găzdui sau pentru participarea la un simultan</string>
   <string name="noSimulFound">Simultanul nu a fost găsit</string>
   <string name="noSimulExplanation">Acest simultan nu există.</string>
   <string name="returnToSimulHomepage">Înapoi la pagina simultanului</string>
@@ -711,8 +745,22 @@
   <string name="keyboardShortcuts">Scurtături taste</string>
   <string name="keyMoveBackwardOrForward">mută înapoi/înainte</string>
   <string name="keyGoToStartOrEnd">început/sfârșit</string>
+  <string name="keyCycleSelectedVariation">Următoarea variație</string>
   <string name="keyShowOrHideComments">arată/ascunde comentarii</string>
   <string name="keyEnterOrExitVariation">acceptă/respinge variație</string>
+  <string name="keyRequestComputerAnalysis">Solicită analiza calculatorului, Învață din greșelile tale</string>
+  <string name="keyNextLearnFromYourMistakes">Următorul (Învață din greșelile tale)</string>
+  <string name="keyNextBlunder">Următoarea greșeală gravă</string>
+  <string name="keyNextMistake">Următoarea greșeală</string>
+  <string name="keyNextInaccuracy">Următoarea neacuratețe</string>
+  <string name="keyPreviousBranch">Ramura precedentă</string>
+  <string name="keyNextBranch">Ramura următoare</string>
+  <string name="toggleVariationArrows">Comută săgețile de variație</string>
+  <string name="cyclePreviousOrNextVariation">Ciclu de variație precedentă/următoare</string>
+  <string name="toggleGlyphAnnotations">Comută adnotările gilfelor</string>
+  <string name="togglePositionAnnotations">Activează/Dezactivează adnotările pozițiilor</string>
+  <string name="variationArrowsInfo">Săgețile de variație vă permit să navigați fără a utiliza lista de mutare.</string>
+  <string name="playSelectedMove">joacă mutarea selectată</string>
   <string name="newTournament">Turneu nou</string>
   <string name="tournamentHomeTitle">Turneu de șah cu control de timp și variante</string>
   <string name="tournamentHomeDescription">Joacă turnee rapide de șah! Intră într-un turneu oficial planificat sau crează-ți-l tu. Bullet (Glonț),  Blitz (Fulger), Classical (Clasic), Chess960, Regele în centru, Trei șahuri și alte opțiuni sunt disponibile pentru o distracție continuă.</string>
@@ -728,7 +776,7 @@
   </plurals>
   <string name="yourPerfTypeRatingIsRating">Scorul %1$s este %2$s.</string>
   <string name="youAreBetterThanPercentOfPerfTypePlayers">Ești mai bun ca %1$s dintre jucătorii de %2$s.</string>
-  <string name="userIsBetterThanPercentOfPerfTypePlayers">Jucătorul %1$s este mai bun ca %2$s dintre jucătorii de %3$s.</string>
+  <string name="userIsBetterThanPercentOfPerfTypePlayers">Jucătorul %1$s este mai bun decât %2$s dintre jucătorii de %3$s.</string>
   <string name="betterThanPercentPlayers">Mai bun decât %1$s dintre jucătorii de %2$s</string>
   <string name="youDoNotHaveAnEstablishedPerfTypeRating">Nu aveți un scor %s definit.</string>
   <string name="yourRating">Scorul tău</string>
@@ -756,6 +804,7 @@
   <string name="withFriends">Cu prietenii</string>
   <string name="withEverybody">Cu toată lumea</string>
   <string name="kidMode">Mod pentru copii</string>
+  <string name="kidModeIsEnabled">Modul copil este activat.</string>
   <string name="kidModeExplanation">În modul „copil”, toate modalitățile de comunicare sunt dezactivate. Activează asta pentru copilul tău sau pentru școlari, pentru a-i proteja de alți utilizatori ai internetului.</string>
   <string name="inKidModeTheLichessLogoGetsIconX">În modul „copil”, sigla paginii va avea iconița %s, în felul acesta vei ști când copiii tăi sunt în siguranță.</string>
   <string name="askYourChessTeacherAboutLiftingKidMode">Contul tău este gestionat. Întreabă-ți profesorul de șah despre scoaterea modului copil.</string>
@@ -796,9 +845,12 @@
   <string name="transparent">Transparent</string>
   <string name="deviceTheme">Tema dispozitivului</string>
   <string name="backgroundImageUrl">URL-ul imaginii de fundal:</string>
-  <string name="boardGeometry">Geometria tablei</string>
-  <string name="boardTheme">Tema tablei</string>
-  <string name="boardSize">Mărimea tablei</string>
+  <string name="board">Tablă</string>
+  <string name="size">Dimensiune</string>
+  <string name="opacity">Opacitate</string>
+  <string name="brightness">Luminozitate</string>
+  <string name="hue">Nuanță</string>
+  <string name="boardReset">Resetează culorile la valorile implicite</string>
   <string name="pieceSet">Set de piese</string>
   <string name="embedInYourWebsite">Incorporează în site-ul tău</string>
   <string name="usernameAlreadyUsed">Nume de utilzator este deja folosit, te rugam să încerci altul.</string>
@@ -873,9 +925,10 @@
     <item quantity="few">și salvează %s variațiile cu mutare anticipată</item>
     <item quantity="other">și salvează %s variațiile cu mutare anticipată</item>
   </plurals>
+  <string name="showUnreadLichessMessage">Ați primit un mesaj privat de la Lichess.</string>
+  <string name="clickHereToReadIt">Click aici pentru a-l citi</string>
   <string name="sorry">Scuze :(</string>
   <string name="weHadToTimeYouOutForAWhile">Am fost nevoiți să suspendăm activitatea pentru puțin timp.</string>
-  <string name="timeoutExpires">Suspendarea se termină %s.</string>
   <string name="why">De ce?</string>
   <string name="pleasantChessExperience">Dorim să oferim o experiență plăcută tuturor jucătorilor de șah.</string>
   <string name="goodPractice">Ca acest lucru să se întâmple, trebuie să ne asigurăm că toți jucătorii respectă bunele practici.</string>
@@ -895,6 +948,8 @@
   <string name="agreementPolicy">Sunt de acord cu respectarea tuturor politicilor Lichess.</string>
   <string name="searchOrStartNewDiscussion">Caută sau începe o nouă conversație</string>
   <string name="edit">Modifică</string>
+  <string name="bullet" comment="Probably best left untranslated. Leave it as 'Bullet' unless your language has a better word for it.">Bullet</string>
+  <string name="blitz" comment="Probably best left untranslated. Leave it as 'Blitz' unless your language has a better word for it.">Blitz</string>
   <string name="rapid">Rapid</string>
   <string name="classical">Clasic</string>
   <string name="ultraBulletDesc">Partide incredibil de rapide: mai puțin de 30 de secunde</string>
@@ -934,9 +989,6 @@
   <string name="timeAlmostUp">Timpul se apropie de sfârșit!</string>
   <string name="clickToRevealEmailAddress">[Click pentru a dezvălui adresa de e-mail]</string>
   <string name="download">Descărcare</string>
-  <string name="welcome">Bine ați venit!</string>
-  <string name="lichessPatronInfo">Lichess este o asociație non-profit și un software gratuit și open-source.
-Toate costurile de operare și de dezvoltare sunt finanțate doar din donațiile utilizatorilor.</string>
   <string name="coachManager">Setări pentru antrenor</string>
   <string name="streamerManager">Setări pentru streamer</string>
   <string name="cancelTournament">Anulează turneul</string>
@@ -949,8 +1001,6 @@ Toate costurile de operare și de dezvoltare sunt finanțate doar din donațiile
   <string name="minimumRatedGames">Numar minim de partide evaluate jucate</string>
   <string name="minimumRating">Rating minim</string>
   <string name="maximumWeeklyRating">Rating săptămânal maxim</string>
-  <string name="onlyTitled">Doar jucători titrati</string>
-  <string name="onlyTitledHelp">Solicitați un titlu oficial pentru a se alătura turneului</string>
   <string name="positionInputHelp">Lipiți un FEN valid pentru a începe fiecare joc dintr-o poziție dată.
 Funcționează doar pentru jocuri standard, nu si pentru variante.
 Puteți utiliza %s pentru a genera o poziție FEN, apoi lipiți-o aici.
@@ -995,4 +1045,10 @@ Lăsați gol pentru a începe jocurile din poziția inițială normală.</string
   <string name="switchSides">Întoarce tabla</string>
   <string name="closingAccountWithdrawAppeal">Închiderea contului dvs. vă va retrage apelul</string>
   <string name="ourEventTips">Sfaturile noastre pentru organizarea evenimentelor</string>
+  <string name="instructions">Instrucțiuni</string>
+  <string name="showMeEverything">Afișează-mi tot</string>
+  <string name="lichessPatronInfo">Lichess este o asociație non-profit și un software gratuit și open-source.
+Toate costurile de operare și de dezvoltare sunt finanțate doar din donațiile utilizatorilor.</string>
+  <string name="nothingToSeeHere">Nimic de văzut aici momentan.</string>
+  <string name="stats">Statistici</string>
 </resources>

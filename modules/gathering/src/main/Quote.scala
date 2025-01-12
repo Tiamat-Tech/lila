@@ -1,7 +1,8 @@
 package lila.quote
 
-import scala.util.Random
 import play.api.libs.json.*
+
+import scala.util.Random
 
 final class Quote(val text: String, val author: String)
 
@@ -11,7 +12,7 @@ object Quote:
 
   def one(seed: String) = all(Random(seed.hashCode).nextInt(all.size))
 
-  // courtesy of http://www.chess.Squareter.com/english/notes_and_facts/chess_quotes.htm
+  // courtesy of http://www.chess-poster.com/english/notes_and_facts/chess_quotes.htm
   // and other various sources
   val all = Vector(
     Quote("When you see a good move, look for a better one.", "Emanuel Lasker"),
@@ -36,10 +37,6 @@ object Quote:
     ),
     Quote("Strategy requires thought, tactics require observation.", "Max Euwe"),
     Quote("I don't believe in psychology. I believe in good moves.", "Bobby Fischer"),
-    Quote(
-      "Modern chess is too much concerned with things like pawn structure. Forget it, checkmate ends the game.",
-      "Nigel Short"
-    ),
     Quote(
       "Life is a kind of chess, with struggle, competition, good and ill events.",
       "Benjamin Franklin"
@@ -92,7 +89,7 @@ object Quote:
     Quote("Chess is mental torture.", "Garry Kasparov"),
     Quote("Many have become chess masters, no one has become the master of chess.", "Siegbert Tarrasch"),
     Quote(
-      "The most important feature of the chess.Position is the activity of the pieces. This is absolutely fundamental in all phases of the game: Opening, Middlegame and especially Endgame. The primary constraint on a piece's activity is the pawn structure.",
+      "The most important feature of the chess position is the activity of the pieces. This is absolutely fundamental in all phases of the game: Opening, Middlegame and especially Endgame. The primary constraint on a piece's activity is the pawn structure.",
       "Michael Stean"
     ),
     Quote(
@@ -290,7 +287,6 @@ object Quote:
       "Though most people love to look at the games of the great attacking masters, some of the most successful players in history have been the quiet positional players. They slowly grind you down by taking away your space, tying up your pieces, and leaving you with virtually nothing to do!",
       "Yasser Seirawan"
     ),
-    Quote("Chess is ruthless; you've got to be prepared to kill people.", "Nigel Short"),
     Quote(
       "There must have been a time when men were demigods, or they could not have invented chess.",
       "Gustav Schenk"
@@ -338,7 +334,7 @@ object Quote:
     ),
     Quote("Castle early and often.", "Rob Sillars"),
     Quote(
-      "I believe that chess.Squaresesses a magic that is also a help in advanced age. A rheumatic knee is forgotten during a game of chess and other events can seem quite unimportant in comparison with a catastrophe on the chessboard.",
+      "I believe that chess possesses a magic that is also a help in advanced age. A rheumatic knee is forgotten during a game of chess and other events can seem quite unimportant in comparison with a catastrophe on the chessboard.",
       "Vlastimil Hort"
     ),
     Quote(
@@ -365,10 +361,6 @@ object Quote:
       "Cecil Purdy"
     ),
     Quote("Chess is like life.", "Boris Spassky"),
-    Quote(
-      "If your opponent offers you a draw, try to work out why he thinks he's worse off.",
-      "Nigel Short"
-    ),
     Quote(
       "Chess teaches you to control the initial excitement you feel when you see something that looks good and it trains you to think objectively when you're in trouble.",
       "Stanley Kubrick"
@@ -424,10 +416,6 @@ object Quote:
     Quote(
       "I played chess with him and would have beaten him sometimes only he always took back his last move, and ran the game out differently.",
       "Mark Twain"
-    ),
-    Quote(
-      "The tactician knows what to do when there is something to do; whereas the strategian knows what to do when there is nothing to do.",
-      "Gerald Abrahams"
     ),
     Quote("In chess, just as in life, today's bliss may be tomorrow’s poison.", "Assiac"),
     Quote(
@@ -828,7 +816,6 @@ object Quote:
       "The scheme of a game is played on positional lines; the decision of it, as a rule, is effected by combinations.",
       "Richard Réti"
     ),
-    Quote("On the chessboard lies and hypocrisy do not last long.", "Emanuel Lasker"),
     Quote(
       "The single most important thing in life is to believe in yourself regardless of what everyone else says.",
       "Hikaru Nakamura"
@@ -1215,11 +1202,6 @@ object Quote:
       "Chess is thriving. There are ever less round robin tournaments and ever more World Champions.",
       "Robert Hübner"
     ),
-    Quote("Chess is, above all, a fight.", "Emanuel Lasker"),
-    Quote(
-      "Chess is, in essence, a game for children. Computers have exacerbated the trends towards youth because they now have an immensely powerful tool at their disposal and can absorb vast amounts of information extremely quickly.",
-      "Nigel Short"
-    ),
     Quote(
       "Chess masters as well as chess computers deserve less reverence than the public accords them.",
       "Eliot Hearst"
@@ -1412,7 +1394,7 @@ object Quote:
       "Mark Taimanov"
     ),
     Quote(
-      "From time to time, like many other players, I glance through my own games of earlier years, and return to positions and variations which have gone out of practice. I attempt to restore them, to find  ideas and plans.",
+      "From time to time, like many other players, I glance through my own games of earlier years, and return to positions and variations which have gone out of practice. I attempt to restore them, to find ideas and plans.",
       "Efim Geller"
     ),
     Quote(
@@ -1474,10 +1456,6 @@ object Quote:
     ),
     Quote("I always urge players to study composed problems and endgames.", "Pal Benko"),
     Quote(
-      "I am acutely conscious, from vast experience in opens, that guys around, say 2100 or more can definitely play chess and that one often has to work very hard to beat them.",
-      "Nigel Short"
-    ),
-    Quote(
       "I am both sad and pleased that in his last tournament, Rashid Gibiatovich came to my home in Latvia. He did not take first place, but the prize for beauty, as always, he took with him. Players die, tournaments are forgotten, but the works of great artists are left behind them to live on forever. (on Nezhmetdinov)",
       "Mikhail Tal"
     ),
@@ -1500,10 +1478,6 @@ object Quote:
     Quote(
       "I believe that the best style is a universal one, tactical and positional at the same time...",
       "Susan Polgar"
-    ),
-    Quote(
-      "I cannot claim to thoroughly enjoy coaching, because it is very hard work if you are even moderately conscientious. Nevertheless it does provide a degree of satisfaction, not to mention a steady income, which is why I do it occasionally.",
-      "Nigel Short"
     ),
     Quote(
       "I cannot think that a player genuinely loving the game can get pleasure just from the number of points scored no matter how impressive the total. I will not speak of myself, but for the masters of the older generation, from whose games we learned, the aesthetic side was the most important.",
@@ -1651,6 +1625,32 @@ object Quote:
     Quote(
       "The good thing about chess is that everyone can learn how to play at any age.",
       "Mariya Muzychuk"
+    ),
+    Quote(
+      "It's not about winning or losing, but of course at the end of the day it's about winning or losing.",
+      "Garry Kasparov"
+    ),
+    Quote(
+      "Ok we can change you know? It's an equal change, I change one attacking piece for one defending piece but I still have enough pieces to mate him.",
+      "Garry Kasparov"
+    ),
+    Quote("King safety is the number one priority.", "Garry Kasparov"),
+    Quote("Magnus is a lethal combination of Fischer and Karpov...", "Garry Kasparov"),
+    Quote(
+      "Then it was not considered much of a surprise that I could beat 32 computers at the same time. To me, that was the golden age. Machines were weak, and my hair was strong.",
+      "Garry Kasparov"
+    ),
+    Quote("Ask the knight on g1 what he thinks about the move f3.", "Edward Gufeld"),
+    Quote("Every chessplayer should have a hobby.", "Savielly Tartakower"),
+    Quote(
+      "A match demonstrates less than a tournament. But a tournament demonstrates nothing at all.",
+      "Savielly Tartakower"
+    ),
+    Quote("...the threat is stronger than the execution.", "Aron Nimzowitsch"),
+    Quote("I can never get mated with a knight on f8.", "Bent Larsen"),
+    Quote(
+      "As for knight endings with an extra pawn... they are, as a rule, won.",
+      "Mark Dvoretsky"
     ),
     // lichess facts
     Quote("All features for free; for everyone; forever.", "lichess.org"),

@@ -26,7 +26,7 @@
   <string name="fairPlayPage">Fair-Play-Säit</string>
   <string name="gameplay">Spillerliefnis</string>
   <string name="howBulletBlitzEtcDecided">Wat decidéiert op eng Zäitkontroll Bullet, Blitz oder eng aner ass?</string>
-  <string name="durationFormula">(Ufankszäit a Sekonnen) + 40 × (Inkrement pro Zuch)</string>
+  <string name="durationFormula" comment="durationFormula&#10;&#10;Part of the larger string 'basedOnGameDuration'&#10;&#10;Note: this string did not use to say 'in seconds'. Please update if necessary.">(Ufankszäit a Sekonnen) + 40 × (Inkrement pro Zuch)</string>
   <string name="inferiorThanXsEqualYtimeControl">≤ %1$s s = %2$s</string>
   <string name="superiorThanXsEqualYtimeControl">≥ %1$s s = %2$s</string>
   <string name="whatVariantsCanIplay">Wéieng Varianten kann ech op Lichess spillen?</string>
@@ -34,7 +34,7 @@
   <string name="eightVariants">8 Schachvarianten</string>
   <string name="whatIsACPL">Wat ass den duerchschnëttlechen Honnertselbauerverloscht (ACPL)?</string>
   <string name="insufficientMaterial">Op Zäit verléieren, Remis an ongenügend Material</string>
-  <string name="fideHandbook" comment="fideHandbook&#10;&#10;Part of the string threefoldRepetitionExplanation in the FAQ (https://lichess.org/faq#threefold).">FIDE-Handbuch</string>
+  <string name="fideHandbook">FIDE-Handbuch</string>
   <string name="fideHandbookX">FIDE Handbuch %s</string>
   <string name="discoveringEnPassant">Firwat kann e Bauern een aneren Bauer schloen, wann hien laanscht gezunn huet? (en passant)</string>
   <string name="goodIntroduction">gutt Aféierung</string>
@@ -72,4 +72,7 @@
   <string name="connexionLostCanIGetMyRatingBack">Ech hunn eng Partie wéinst Lag/Verbindungsverloscht verluer. Kann ech meng Wäertungspunkten zeréckkréien?</string>
   <string name="howToThreeDots">Wéi...</string>
   <string name="enableDisableNotificationPopUps">Notifikatiouns-Popups aktivéieren an desaktivéieren?</string>
+  <string name="desktop" comment="Appears on the FAQ for &quot;Enable autoplay for sounds&quot; https://lichess.org/faq#autoplay&#10;&#10;Indicates that the instructions are for a desktop computer browser - not a mobile browser.">Desktop</string>
+  <string name="stopMyselfFromPlaying" comment="As in &quot;How to stop myself from playing?&quot;.&#10;&#10;It is an FAQ which addresses chess/gaming addiction.">Mech selwer vum s`Spillen ofhalen?</string>
+  <string name="lichessUserstyles" comment="User styles are ways to customise the appearance of Lichess using third-party tools.&#10;&#10;Part of a longer FAQ answer on chess/gaming addiction. See the full text on adviceOnMitigatingAddiction.">Lichess-Benotzerstiler</string>
 </resources>

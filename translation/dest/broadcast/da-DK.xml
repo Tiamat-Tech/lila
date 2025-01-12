@@ -1,30 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="broadcasts">Udsendelser</string>
+  <string name="myBroadcasts">Mine udsendelser</string>
   <plurals name="nbBroadcasts">
     <item quantity="one">%s udsendelse</item>
     <item quantity="other">%s udsendelser</item>
   </plurals>
   <string name="liveBroadcasts">Live turnerings-udsendelser</string>
+  <string name="broadcastCalendar">Kaldender for udsendelser</string>
   <string name="newBroadcast">Ny live-udsendelse</string>
+  <string name="subscribedBroadcasts">Udsendelser, du abonnerer på</string>
+  <string name="aboutBroadcasts">Om udsendelse</string>
+  <string name="howToUseLichessBroadcasts">Sådan bruges Lichess-udsendelser.</string>
+  <string name="theNewRoundHelp">Den nye runde vil have de samme medlemmer og bidragydere som den foregående.</string>
   <string name="addRound">Tilføj en runde</string>
   <string name="ongoing">I gang</string>
   <string name="upcoming">Kommende</string>
   <string name="completed">Afsluttet</string>
+  <string name="completedHelp">Lichess registrerer rund-færdiggørelse baseret på kildepartierne. Brug denne skifter, hvis der ikke er nogen kilde.</string>
   <string name="roundName">Rundenavn</string>
   <string name="roundNumber">Rundenummer</string>
   <string name="tournamentName">Turneringsnavn</string>
   <string name="tournamentDescription">Kort beskrivelse af turnering</string>
   <string name="fullDescription">Fuld beskrivelse af begivenheden</string>
   <string name="fullDescriptionHelp">Valgfri lang beskrivelse af transmissionen. %1$s er tilgængelig. Længde skal være mindre end %2$s tegn.</string>
-  <string name="sourceUrlOrGameIds">Kilde URL, eller spil-ID\'er</string>
+  <string name="sourceSingleUrl" comment="An input box. The user can add the external URL the PGN playback of the game is coming from, to set up their event broadcast.&#10;&#10;Could be alternatively stated as &quot;Source URL for the PGN&quot;.">URL for PGN-kilde</string>
   <string name="sourceUrlHelp">URL som Lichess vil trække på for at få PGN updates. Den skal være offentlig tilgængelig fra internettet.</string>
-  <string name="gameIdsHelp">Alternativt kan du indtaste op til 64 Lichess spil-ID\'er, adskilt af mellemrum.</string>
-  <string name="startDate">Startdato i din egen tidszone</string>
+  <string name="sourceGameIds">Op til 64 Lichess parti-ID\'er, adskilt af mellemrum.</string>
+  <string name="startDateTimeZone">Startdato i turneringens lokale tidszone: %s</string>
   <string name="startDateHelp">Valgfri, hvis du ved, hvornår begivenheden starter</string>
-  <string name="credits">Krediter kilden</string>
-  <string name="broadcastUrl">Udsendelse-URL</string>
-  <string name="currentRoundUrl">Nuværende runde URL</string>
   <string name="currentGameUrl">Nuværende parti URL</string>
   <string name="downloadAllRounds">Download alle runder</string>
   <string name="resetRound">Nulstil denne runde</string>
@@ -33,5 +37,47 @@
   <string name="deleteAllGamesOfThisRound">Slet alle partier i denne runde. Kilden skal være aktiv for at genskabe dem.</string>
   <string name="editRoundStudy">Rediger rundestudie</string>
   <string name="deleteTournament">Slet denne turnering</string>
-  <string name="definitivelyDeleteTournament" comment="definitivelyDeleteTournament&#10;&#10;Confirmation prompt, when attempting to delete a broadcast on https://lichess.org/broadcast">Slet hele turneringen, alle dens runder og alle dens partier.</string>
+  <string name="definitivelyDeleteTournament">Slet hele turneringen, alle dens runder og alle dens partier.</string>
+  <string name="showScores" comment="An option for creating a broadcast (https://lichess.org/broadcast). This is optional, as scoring will be calculated automatically by Lichess, and some organisations prefer to do this manually or not show scores until the end - depending on how the tournament works.">Vis spilleres point baseret på resultater fra partier</string>
+  <string name="replacePlayerTags">Valgfrit: udskift spillernavne, ratings og titler</string>
+  <string name="fideFederations">FIDE-føderationer</string>
+  <string name="top10Rating">Top 10 rating</string>
+  <string name="fidePlayers">FIDE-spillere</string>
+  <string name="fidePlayerNotFound">FIDE-spiller ikke fundet</string>
+  <string name="fideProfile">FIDE-profil</string>
+  <string name="federation">Føderation</string>
+  <string name="ageThisYear">Alder i år</string>
+  <string name="unrated" comment="Please do not translate simply as &quot;casual&quot;. &quot;Unrated&quot; here refers to tournaments that are organised outside of Lichess. The rating in question will usually align to a FIDE federation.">Uden rating</string>
+  <string name="recentTournaments">Seneste turneringer</string>
+  <string name="openLichess" comment="Appears as a link when a Lichess broadcast is embedded in an external website. Clicking it will take the user to the Lichess website, to view it in full.&#10;&#10;For an example of what an embedded broadcast looks like, see https://lichess.org/developers under the section 'Embed a broadcast in your site'.">Åbn i Lichess</string>
+  <string name="teams">Hold</string>
+  <string name="boards">Brætter</string>
+  <string name="overview">Oversigt</string>
+  <string name="subscribeTitle">Abonner på at blive underrettet, når hver runde starter. Du kan skifte mellem klokke- eller push-meddelelser for udsendelser i dine kontoindstillinger.</string>
+  <string name="uploadImage">Upload turneringsbillede</string>
+  <string name="noBoardsYet">Ingen brætter endnu. Disse vises når partier er uploadet.</string>
+  <string name="boardsCanBeLoaded" comment="%s is 'Broadcaster App'">Brætter kan indlæses med en kilde eller via %s</string>
+  <string name="startsAfter">Starter efter %s</string>
+  <string name="startVerySoon">Udsendelsen starter meget snart.</string>
+  <string name="notYetStarted">Udsendelsen er endnu ikke startet.</string>
+  <string name="officialWebsite">Officielt websted</string>
+  <string name="standings">Stillinger</string>
+  <string name="officialStandings">Officiel stilling</string>
+  <string name="iframeHelp" comment="%s is 'webmasters page'">Flere muligheder på %s</string>
+  <string name="webmastersPage">webmasters side</string>
+  <string name="pgnSourceHelp" comment="%s is 'streaming API'">En offentlig, realtids PGN-kilde til denne runde. Vi tilbyder også en %s for hurtigere og mere effektiv synkronisering.</string>
+  <string name="embedThisBroadcast">Indlejr denne udsendelse på dit website</string>
+  <string name="embedThisRound">Indlejr %s på dit website</string>
+  <string name="ratingDiff">Rating-forskel</string>
+  <string name="gamesThisTournament">Partier i denne turnering</string>
+  <string name="score">Score</string>
+  <string name="allTeams">Alle hold</string>
+  <string name="tournamentFormat">Turneringsformat</string>
+  <string name="tournamentLocation">Turneringssted</string>
+  <string name="topPlayers">Topspillere</string>
+  <string name="timezone">Tidszone</string>
+  <string name="fideRatingCategory">FIDE-ratingkategori</string>
+  <string name="optionalDetails">Valgfri detaljer</string>
+  <string name="pastBroadcasts">Tidligere udsendelser</string>
+  <string name="allBroadcastsByMonth">Vis alle udsendelser efter måned</string>
 </resources>

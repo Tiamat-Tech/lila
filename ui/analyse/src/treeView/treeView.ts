@@ -1,44 +1,29 @@
-import AnalyseCtrl from '../ctrl';
+import type AnalyseCtrl from '../ctrl';
 import column from './columnView';
 import inline from './inlineView';
-import isCol1 from 'common/isCol1';
-import { VNode } from 'snabbdom';
-import { ConcealOf } from '../interfaces';
-import { storedProp, StoredProp } from 'common/storage';
+import { isCol1 } from 'common/device';
+import type { VNode } from 'snabbdom';
+import type { ConcealOf } from '../interfaces';
+import { storedProp, type StoredProp } from 'common/storage';
 
 export type TreeViewKey = 'column' | 'inline';
 
-export interface TreeView {
-  get: StoredProp<TreeViewKey>;
-  set(inline: boolean): void;
-  toggle(): void;
-  inline(): boolean;
-}
+export class TreeView {
+  value: StoredProp<TreeViewKey>;
 
-export function ctrl(initialValue: TreeViewKey = 'column'): TreeView {
-  const value = storedProp<TreeViewKey>(
-    'treeView',
-    initialValue,
-    str => str as TreeViewKey,
-    v => v,
-  );
-  function inline() {
-    return value() === 'inline';
+  constructor(initialValue: TreeViewKey = 'column') {
+    this.value = storedProp<TreeViewKey>(
+      'treeView',
+      initialValue,
+      str => str as TreeViewKey,
+      v => v,
+    );
   }
-  function set(i: boolean) {
-    value(i ? 'inline' : 'column');
-  }
-  return {
-    get: value,
-    set,
-    toggle() {
-      set(!inline());
-    },
-    inline,
-  };
+  inline = () => this.value() === 'inline';
+  set = (inline: boolean) => this.value(inline ? 'inline' : 'column');
+  toggle = () => this.set(!this.inline());
 }
 
 // entry point, dispatching to selected view
-export function render(ctrl: AnalyseCtrl, concealOf?: ConcealOf): VNode {
-  return (ctrl.treeView.inline() || isCol1()) && !concealOf ? inline(ctrl) : column(ctrl, concealOf);
-}
+export const render = (ctrl: AnalyseCtrl, concealOf?: ConcealOf): VNode =>
+  (ctrl.treeView.inline() || isCol1()) && !concealOf ? inline(ctrl) : column(ctrl, concealOf);

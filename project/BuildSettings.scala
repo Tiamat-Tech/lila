@@ -6,17 +6,14 @@ object BuildSettings {
   import Dependencies._
 
   val lilaVersion        = "4.0"
-  val globalScalaVersion = "3.3.1"
-
-  val shadedMongo = !System.getProperty("os.arch").toLowerCase.startsWith("aarch")
-  if (shadedMongo) println("--- shaded native reactivemongo ---")
+  val globalScalaVersion = "3.6.2"
 
   def buildSettings =
     Defaults.coreDefaultSettings ++ Seq(
       resolvers ++= Seq(lilaMaven, sonashots),
       scalaVersion := globalScalaVersion,
       scalacOptions ++= compilerOptions,
-      javacOptions ++= Seq("--release", "17"),
+      javacOptions ++= Seq("--release", "21"),
       organization                           := "org.lichess",
       version                                := lilaVersion,
       Compile / doc / sources                := Seq.empty,
@@ -25,12 +22,12 @@ object BuildSettings {
     )
 
   lazy val defaultLibs: Seq[ModuleID] =
-    akka.bundle ++ macwire.bundle ++ Seq(
+    akka.bundle ++ macwire.bundle ++ scalalib.bundle ++ Seq(
       cats,
       alleycats,
       play.api,
-      chess,
-      scalalib,
+      chess.core,
+      chess.rating,
       kittens
     )
 
@@ -48,17 +45,18 @@ object BuildSettings {
       )
 
   val compilerOptions = Seq(
+    "-Ybackend-parallelism:16", // https://github.com/scala/scala3/pull/15392
     // "-nowarn", // during migration
     // "-rewrite",
-    // "-source:future-migration",
-    // "-indent",
+    "-source:3.7",
+    "-indent",
     // "-explaintypes",
     // "-explain",
     "-feature",
     "-language:postfixOps",
     "-language:implicitConversions",
-    "-release:17"
-    // "-Wunused:all"
+    "-release:21"
+    // "-Wunused:all",
   )
 
   val srcMain = Seq(

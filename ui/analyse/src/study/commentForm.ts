@@ -1,9 +1,10 @@
-import { prop, Prop } from 'common';
+import { prop } from 'common';
 import { onInsert } from 'common/snabbdom';
-import throttle from 'common/throttle';
-import { h, VNode } from 'snabbdom';
-import AnalyseCtrl from '../ctrl';
+import { throttle } from 'common/timing';
+import { h, type VNode } from 'snabbdom';
+import type AnalyseCtrl from '../ctrl';
 import { currentComments, isAuthorObj } from './studyComments';
+import { storage } from 'common/storage';
 
 interface Current {
   chapterId: string;
@@ -11,74 +12,39 @@ interface Current {
   node: Tree.Node;
 }
 
-export interface CommentForm {
-  root: AnalyseCtrl;
-  current: Prop<Current | null>;
-  opening: Prop<boolean>;
-  submit(text: string): void;
-  start(chapterId: string, path: Tree.Path, node: Tree.Node): void;
-  onSetPath(chapterId: string, path: Tree.Path, node: Tree.Node): void;
-  redraw(): void;
-  delete(chapterId: string, path: Tree.Path, id: string): void;
-}
+export class CommentForm {
+  current = prop<Current | null>(null);
+  opening = prop(false);
+  constructor(readonly root: AnalyseCtrl) {}
 
-export function ctrl(root: AnalyseCtrl): CommentForm {
-  const current = prop<Current | null>(null),
-    opening = prop(false);
+  submit = (text: string) => this.current() && this.doSubmit(text);
 
-  function submit(text: string): void {
-    if (!current()) return;
-    doSubmit(text);
-  }
-
-  const doSubmit = throttle(500, (text: string) => {
-    const cur = current();
-    if (cur)
-      root.study!.makeChange('setComment', {
-        ch: cur.chapterId,
-        path: cur.path,
-        text,
-      });
+  doSubmit = throttle(500, (text: string) => {
+    const cur = this.current();
+    if (cur) this.root.study!.makeChange('setComment', { ch: cur.chapterId, path: cur.path, text });
   });
 
-  function start(chapterId: string, path: Tree.Path, node: Tree.Node): void {
-    opening(true);
-    current({
-      chapterId,
-      path,
-      node,
-    });
-    root.userJump(path);
-  }
+  start = (chapterId: string, path: Tree.Path, node: Tree.Node): void => {
+    this.opening(true);
+    this.current({ chapterId, path, node });
+    this.root.userJump(path);
+  };
 
-  return {
-    root,
-    current,
-    opening,
-    submit,
-    start,
-    onSetPath(chapterId: string, path: Tree.Path, node: Tree.Node): void {
-      const cur = current();
-      if (cur && (path !== cur.path || chapterId !== cur.chapterId || cur.node !== node)) {
-        cur.chapterId = chapterId;
-        cur.path = path;
-        cur.node = node;
-      }
-    },
-    redraw: root.redraw,
-    delete(chapterId: string, path: Tree.Path, id: string) {
-      root.study!.makeChange('deleteComment', {
-        ch: chapterId,
-        path,
-        id,
-      });
-    },
+  onSetPath = (chapterId: string, path: Tree.Path, node: Tree.Node): void => {
+    const cur = this.current();
+    if (cur && (path !== cur.path || chapterId !== cur.chapterId || cur.node !== node)) {
+      cur.chapterId = chapterId;
+      cur.path = path;
+      cur.node = node;
+    }
+  };
+  delete = (chapterId: string, path: Tree.Path, id: string) => {
+    this.root.study!.makeChange('deleteComment', { ch: chapterId, path, id });
   };
 }
 
-export function viewDisabled(root: AnalyseCtrl, why: string): VNode {
-  return h('div.study__comments', [currentComments(root, true), h('div.study__message', why)]);
-}
+export const viewDisabled = (root: AnalyseCtrl, why: string): VNode =>
+  h('div.study__comments', [currentComments(root, true), h('div.study__message', why)]);
 
 export function view(root: AnalyseCtrl): VNode {
   const study = root.study!,
@@ -90,7 +56,7 @@ export function view(root: AnalyseCtrl): VNode {
     const newKey = current.chapterId + current.path;
 
     if (old?.data!.path !== newKey) {
-      const mine = (current!.node.comments || []).find(function (c) {
+      const mine = (current.node.comments || []).find(function (c) {
         return isAuthorObj(c.by) && c.by.id && c.by.id === ctrl.root.opts.userId;
       });
       el.value = mine ? mine.text : '';
@@ -105,9 +71,7 @@ export function view(root: AnalyseCtrl): VNode {
 
   return h(
     'div.study__comments',
-    {
-      hook: onInsert(() => root.enableWiki(root.data.game.variant.key === 'standard')),
-    },
+    { hook: onInsert(() => root.enableWiki(root.data.game.variant.key === 'standard')) },
     [
       currentComments(root, !study.members.canContribute()),
       h('form.form3', [
@@ -117,9 +81,13 @@ export function view(root: AnalyseCtrl): VNode {
               setupTextarea(vnode);
               const el = vnode.elm as HTMLInputElement;
               el.oninput = () => setTimeout(() => ctrl.submit(el.value), 50);
-              const heightStore = lichess.storage.make('study.comment.height');
+              const heightStore = storage.make('study.comment.height');
               el.onmouseup = () => heightStore.set('' + el.offsetHeight);
               el.style.height = parseInt(heightStore.get() || '80') + 'px';
+
+              $(el).on('keydown', e => {
+                if (e.code === 'Escape') el.blur();
+              });
             },
             postpatch: (old, vnode) => setupTextarea(vnode, old),
           },

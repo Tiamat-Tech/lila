@@ -2,27 +2,23 @@ package lila.memo
 
 import com.github.benmanes.caffeine
 import com.github.blemale.scaffeine.*
-import play.api.Mode
 
-final class CacheApi(mode: Mode)(using Executor, Scheduler):
+final class CacheApi(using Executor, Scheduler)(using mode: play.api.Mode):
 
   import CacheApi.*
-
-  def scaffeine: Builder = CacheApi.scaffeine
 
   // AsyncLoadingCache with monitoring
   def apply[K, V](initialCapacity: Int, name: String)(
       build: Builder => AsyncLoadingCache[K, V]
   ): AsyncLoadingCache[K, V] =
-    val cache = build {
+    val cache = build:
       scaffeine.recordStats().initialCapacity(actualCapacity(initialCapacity))
-    }
     monitor(name, cache)
     cache
 
   // AsyncLoadingCache for a single entry
   def unit[V](build: Builder => AsyncLoadingCache[Unit, V]): AsyncLoadingCache[Unit, V] =
-    build(scaffeine initialCapacity 1)
+    build(scaffeine.initialCapacity(1))
 
   // AsyncLoadingCache with monitoring and a synchronous getter
   def sync[K, V](
@@ -34,8 +30,8 @@ final class CacheApi(mode: Mode)(using Executor, Scheduler):
       expireAfter: Syncache.ExpireAfter
   ): Syncache[K, V] =
     val actualCapacity =
-      if mode != Mode.Prod then math.sqrt(initialCapacity.toDouble).toInt atLeast 1
-      else initialCapacity
+      if mode.isProd then initialCapacity
+      else math.sqrt(initialCapacity.toDouble).toInt.atLeast(1)
     val cache = new Syncache(name, actualCapacity, compute, default, strategy, expireAfter)
     monitor(name, cache.cache)
     cache
@@ -43,18 +39,16 @@ final class CacheApi(mode: Mode)(using Executor, Scheduler):
   def notLoading[K, V](initialCapacity: Int, name: String)(
       build: Builder => AsyncCache[K, V]
   ): AsyncCache[K, V] =
-    val cache = build {
+    val cache = build:
       scaffeine.recordStats().initialCapacity(actualCapacity(initialCapacity))
-    }
     monitor(name, cache)
     cache
 
   def notLoadingSync[K, V](initialCapacity: Int, name: String)(
       build: Builder => Cache[K, V]
   ): Cache[K, V] =
-    val cache = build {
+    val cache = build:
       scaffeine.recordStats().initialCapacity(actualCapacity(initialCapacity))
-    }
     monitor(name, cache)
     cache
 
@@ -68,24 +62,24 @@ final class CacheApi(mode: Mode)(using Executor, Scheduler):
     startMonitor(name, cache)
 
   def actualCapacity(c: Int) =
-    if mode != Mode.Prod then math.sqrt(c.toDouble).toInt atLeast 1
-    else c
+    if mode.isProd then c else math.sqrt(c.toDouble).toInt.atLeast(1)
 
 object CacheApi:
 
-  export lila.common.LilaCache.*
+  export scalalib.cache.{ scaffeine, scaffeineNoScheduler }
 
   private[memo] type Builder = Scaffeine[Any, Any]
 
   extension [K, V](cache: AsyncCache[K, V])
 
-    def invalidate(key: K): Unit = cache.underlying.synchronous invalidate key
+    def invalidate(key: K): Unit = cache.underlying.synchronous.invalidate(key)
     def invalidateAll(): Unit    = cache.underlying.synchronous.invalidateAll()
 
     def update(key: K, f: V => V): Unit =
-      cache.getIfPresent(key) foreach { v =>
-        cache.put(key, v dmap f)
-      }
+      cache
+        .getIfPresent(key)
+        .foreach: v =>
+          cache.put(key, v.dmap(f))
 
   extension [V](cache: AsyncCache[Unit, V])
     def invalidateUnit(): Unit = cache.underlying.synchronous.invalidate {}

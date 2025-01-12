@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="swiss" comment="Used as an adjective.&#10;&#10;Appears on tournament pages information boxes, to explain that the tournament is Swiss format.">Suisse</string>
   <string name="swissTournaments">Tournoi au système suisse</string>
   <plurals name="viewAllXRounds" comment="viewAllXRounds [one] [other]&#10;&#10;%s is the number of rounds in the Swiss tournament.">
     <item quantity="one">Voir la ronde</item>
@@ -26,7 +27,7 @@
     <item quantity="one">%s minutes entre les rondes</item>
     <item quantity="other">%s minutes entre les rondes</item>
   </plurals>
-  <string name="startingIn" comment="Displayed above a timer">Commence dans</string>
+  <string name="startingIn" comment="Displayed above a timer. Is auto-capitalised.">Commence dans</string>
   <string name="nextRound">Prochaine ronde</string>
   <plurals name="ongoingGames" comment="Displayed next to the ongoing games count">
     <item quantity="one">Partie en cours</item>
@@ -38,51 +39,62 @@
   <string name="roundInterval">Délai entre les rondes</string>
   <string name="forbiddenPairings">Appariements interdits</string>
   <string name="forbiddenPairingsHelp">Pseudos des joueurs qui ne doivent pas jouer ensemble (frères et sœurs par exemple). Deux pseudos par ligne séparés par un espace.</string>
+  <string name="manualPairings">Appariements manuels pour la prochaine ronde</string>
+  <string name="manualPairingsHelp">Indiquez manuellement tous les appariements de la ronde suivante. Deux joueurs par ligne. Par exemple :
+JoueurA JoueurB
+JoueurC JoueurD
+Pour accorder un bye (1 point) à un joueur au lieu de l\'apparier, ajoutez une ligne comme suit :
+JoueurE 1
+Les joueurs manquants seront considérés comme absents et recevront zéro point.
+Laissez ce champ vide pour autoriser Lichess à générer des appariements automatiquement.</string>
+  <string name="mustHavePlayedTheirLastSwissGame">Doivent avoir joué leur dernière partie dans un tournoi au format suisse</string>
+  <string name="mustHavePlayedTheirLastSwissGameHelp">N\'autorisez les joueurs à participer que s\'ils ont joué leur dernière partie dans un tournoi au format suisse. S\'ils ne se sont pas présentés lors d’un tournoi récent, ils ne pourront pas participer au vôtre. Cela permet d’améliorer l\'expérience des joueurs qui sont effectivement présents.</string>
   <string name="newSwiss">Nouveau tournoi suisse</string>
-  <string name="swissVsArenaQ">Quand utiliser un tournoi suisse plutôt qu\'un tournoi arène?</string>
+  <string name="swissVsArenaQ">Quand utiliser un tournoi suisse plutôt qu\'un tournoi arène ?</string>
   <string name="swissVsArenaA">Dans un tournoi suisse, les participants jouent le même nombre de parties et n\'affrontent jamais deux fois un même adversaire.
 C\'est un bon choix pour les clubs et les tournois officiels.</string>
-  <string name="pointsCalculationQ">Comment calcule-t-on les points?</string>
+  <string name="pointsCalculationQ">Comment calcule-t-on les points ?</string>
   <string name="pointsCalculationA">Une victoire donne un point, une nulle donne un demi-point, une défaite ne donne aucun point.
 Si un joueur ne peut pas être apparié, il reçoit un bye d\'un demi-point.</string>
-  <string name="tiebreaksCalculationQ">Comment les points de départage sont-ils calculés?</string>
+  <string name="tiebreaksCalculationQ">Comment les points de départage sont-ils calculés ?</string>
   <string name="sonnebornBergerScore">Départage Sonneborn-Berger</string>
   <string name="tiebreaksCalculationA">Avec le %s.
 Ajoute le résultat de chaque adversaire battu par le joueur et la moitié du résultat de chaque adversaire contre lequel le joueur a fait nulle.</string>
-  <string name="pairingsQ">Comment les appariements sont-ils faits?</string>
+  <string name="pairingsQ">Comment les appariements sont-ils faits ?</string>
   <string name="dutchSystem">Système néerlandais</string>
   <string name="FIDEHandbook">Manuel de la FIDE</string>
   <string name="pairingsA">Avec le %1$s, mis en place par %2$s, selon le %3$s.</string>
-  <string name="moreRoundsThanPlayersQ">Qu\'arrive-t-il si le tournoi compte plus de rondes que de joueurs?</string>
+  <string name="moreRoundsThanPlayersQ">Qu\'arrive-t-il si le tournoi compte plus de rondes que de joueurs ?</string>
   <string name="moreRoundsThanPlayersA">Une fois tous les appariements possibles faits et toutes les parties jouées, le tournoi se termine et un gagnant est choisi.</string>
-  <string name="restrictedToTeamsQ">Pourquoi peut-on participer uniquement en équipe?</string>
+  <string name="restrictedToTeamsQ">Pourquoi peut-on participer uniquement en équipe ?</string>
   <string name="restrictedToTeamsA">Les tournois de type suisse n\'ont pas été conçus pour les parties d\'échecs en ligne. Ils exigent ponctualité, engagement et patience de la part des joueurs. Nous pensons que ces conditions sont probablement mieux satisfaites dans des tournois par équipes que dans des tournois individuels.</string>
-  <string name="numberOfByesQ">Combien de bye un joueur peut-il obtenir?</string>
+  <string name="numberOfByesQ">Combien de bye un joueur peut-il obtenir ?</string>
   <string name="numberOfByesA">Un joueur reçoit un bye de un point chaque fois qu\'il est impossible de l\'apparier à un autre joueur.
 De plus, un joueur reçoit un bye de un demi-point lorsqu\'il se joint tardivement à un tournoi.</string>
-  <string name="earlyDrawsQ">Que se passe-t-il avec les nulles précoces?</string>
+  <string name="earlyDrawsQ">Que se passe-t-il avec les nulles précoces ?</string>
   <string name="earlyDrawsAnswer">Dans les parties suisses, les joueurs ne peuvent faire nulle avant 30 coups. Cette règle n\'empêche pas les nulles conclues d\'avance, mais elle rend plus difficiles les nulles rapides.</string>
-  <string name="whatIfOneDoesntPlayQ">Qu\'arrive-t-il si un joueur ne se présente pas pour la partie?</string>
+  <string name="whatIfOneDoesntPlayQ">Qu\'arrive-t-il si un joueur ne se présente pas pour la partie ?</string>
   <string name="whatIfOneDoesntPlayA">Son horloge démarrera et il perdra éventuellement la partie au temps.
 Ensuite, il sera retiré du tournoi pour éviter de perdre d\'autres parties par défaut.
 Il pourra se joindre de nouveau au tournoi n\'importe quand par la suite.</string>
-  <string name="protectionAgainstNoShowQ">Que fait-on dans le cas d\'un joueur qui ne se présente pas pour une partie?</string>
-  <string name="protectionAgainstNoShowA">Les joueurs qui s\'inscrivent à un tournoi suisse, mais qui ne jouent pas une ou plusieurs de leurs parties, sont un problème.
+  <string name="protectionAgainstNoShowQ">Que fait-on dans le cas d\'un joueur qui ne se présente pas pour une partie ?</string>
+  <string name="protectionAgainstNoShowA" comment="By &quot;a game&quot; - we mean just one game. Missing even one game will prevent that player from joining a new Swiss event for a certain amount of time.">Les joueurs qui s\'inscrivent à un tournoi suisse, mais qui ne jouent pas une ou plusieurs de leurs parties, sont un problème.
 Pour réduire ce problème, Lichess empêche ces joueurs de participer à un nouveau tournoi suisse pendant un certain temps.
 Mais l\'organisateur d\'un tournoi suisse peut décider de les laisser participer.</string>
-  <string name="lateJoinQ">Un joueur peut-il se joindre tardivement à un tournoi?</string>
+  <string name="lateJoinQ">Un joueur peut-il se joindre tardivement à un tournoi ?</string>
   <string name="lateJoinA">Oui, tant que pas plus de la moitié des rondes ont été jouées. Par exemple, pour un tournoi suisse de 11 rondes, un joueur doit s\'inscrire avant la ronde 6; pour un tournoi de 12 rondes, il doit s\'inscrire avant la ronde 7.
 Les joueurs inscrits tardivement reçoivent un bye de un point, même s\'ils ont manqué plusieurs rondes.</string>
-  <string name="willSwissReplaceArenasQ">Les tournois de type suisse remplaceront-ils les tournois de type arène?</string>
+  <string name="willSwissReplaceArenasQ">Les tournois de type suisse remplaceront-ils les tournois de type arène ?</string>
   <string name="willSwissReplaceArenasA">Non. Ce sont des tournois de type complémentaire.</string>
-  <string name="roundRobinQ">Et les tournois à la ronde?</string>
-  <string name="roundRobinA">Nous aimerions ajouter des tournois à la ronde, mais ce type de tournoi ne fonctionne malheureusement pas en ligne.
-Pourquoi? Parce qu\'il n\'existe pas de façon équitable de résoudre le problème des joueurs qui abandonnent prématurément un tournoi. Nous ne pouvons pas nous attendre à ce que tous les joueurs jouent la totalité de leurs parties durant un tournoi en ligne. C\'est simplement impossible. Pour cette raison, nous préférons ne pas offrir de tournois à la ronde. Ce qui se rapproche le plus d\'un tournoi à la ronde, c\'est un tournoi suisse comportant un grand nombre de rondes. Dans un tel tournoi, tous les appariements possibles seront faits et toutes les parties seront jouées avant la fin du tournoi.</string>
-  <string name="otherSystemsQ">Y a-t-il d\'autres types de tournoi?</string>
+  <string name="roundRobinQ">Et les tournois en rondes complètes (round-robin) ?</string>
+  <string name="roundRobinA">Nous aimerions ajouter des tournois en rondes complètes, mais ce type de tournoi ne fonctionne malheureusement pas en ligne.
+Pourquoi ? Parce qu\'il n\'existe pas de façon équitable de résoudre le problème des joueurs qui abandonnent prématurément un tournoi. Nous ne pouvons pas nous attendre à ce que tous les joueurs jouent la totalité de leurs parties durant un tournoi en ligne. C\'est simplement impossible. Pour cette raison, nous préférons ne pas offrir de tournois en rondes complètes.
+Ce qui se rapproche le plus d\'un tournoi en rondes complètes, c\'est un tournoi suisse comportant un grand nombre de rondes. Dans un tel tournoi, tous les appariements possibles seront faits et toutes les parties seront jouées avant la fin du tournoi.</string>
+  <string name="otherSystemsQ">Y a-t-il d\'autres types de tournoi ?</string>
   <string name="otherSystemsA">Pour le moment, nous ne prévoyons pas ajouter d\'autres types de tournoi dans Lichess.</string>
   <string name="swissDescription">Dans un tournoi suisse %1$s, un joueur n\'affronte pas tous les autres joueurs. Les adversaires sont appariés à chaque ronde selon des règles qui font que chaque joueur rencontre toujours un adversaire différent, mais dont le pointage est similaire au sien. Le gagnant du tournoi est le joueur qui a accumulé le plus grand nombre de points à la fin du tournoi. Tous les joueurs jouent à chaque ronde, à moins qu\'ils soient en nombre impair.</string>
-  <string name="teamOnly">Seuls des chefs d\'équipe peuvent créer un tournoi suisse, et seules des équipes peuvent y participer.            
-%1$s pour commencer à jouer dans un tournoi suisse.</string>
+  <string name="teamOnly">Les tournois suisses ne peuvent être créés que par des chefs d\'équipe et ne peuvent être joués que par les membres de l\'équipe. 
+%1$s pour commencer à jouer dans des tournois suisses.</string>
   <string name="joinOrCreateTeam">Joindre ou créer une équipe</string>
   <string name="nowPlaying">Tournoi en cours</string>
   <string name="startingSoon">Tournoi sur le point de commencer</string>
@@ -107,9 +119,12 @@ Pourquoi? Parce qu\'il n\'existe pas de façon équitable de résoudre le probl�
   <string name="pause">Pause</string>
   <string name="pauseSwiss">Oui, mais peut réduire le nombre de rondes</string>
   <string name="streaksAndBerserk">Séries et Berserk</string>
-  <string name="similarToOTB">Similaire aux tournois en personne</string>
+  <string name="similarToOTB">Similaire aux tournois en présentiel</string>
   <string name="unlimitedAndFree">Illimité et gratuit</string>
   <string name="predefinedUsers">Autoriser uniquement les utilisateurs prédéfinis à s\'inscrire</string>
   <string name="forbiddedUsers">Si la liste n\'est pas vide, seuls les utilisateurs y figurant pourront s\'inscrire. Un nom d\'utilisateur par ligne.</string>
   <string name="playYourGames">Jouez vos parties</string>
+  <string name="byes">Byes</string>
+  <string name="absences">Absences</string>
+  <string name="tieBreak">Départage</string>
 </resources>

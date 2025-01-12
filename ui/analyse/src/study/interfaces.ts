@@ -1,96 +1,34 @@
-import * as cg from 'chessground/types';
-import { Config as CgConfig } from 'chessground/config';
-import { Prop } from 'common';
-import { NotifCtrl } from './notif';
-import { AnalyseData, Redraw } from '../interfaces';
-import { StudyPracticeCtrl } from './practice/interfaces';
-import StudyChaptersCtrl from './studyChapters';
-import { DescriptionCtrl } from './description';
-import GamebookPlayCtrl from './gamebook/gamebookPlayCtrl';
-import { GamebookOverride } from './gamebook/interfaces';
-import { GlyphCtrl } from './studyGlyph';
-import { CommentForm } from './commentForm';
-import TopicsCtrl from './topics';
-import RelayCtrl from './relay/relayCtrl';
-import ServerEval from './serverEval';
-import { MultiBoardCtrl } from './multiBoard';
-import { StudyShareCtrl } from './studyShare';
-import { TagsCtrl } from './studyTags';
-import { StudyFormCtrl } from './studyForm';
-import { StudyMemberCtrl } from './studyMembers';
-import { Opening } from '../explorer/interfaces';
-import { StudySocketSendParams } from '../socket';
-import { SearchCtrl } from './studySearch';
-
-export interface StudyCtrl {
-  data: StudyData;
-  currentChapter(): StudyChapterMeta;
-  socketHandler(t: string, d: any): boolean;
-  vm: StudyVm;
-  setTab(tab: Tab): void;
-  relay?: RelayCtrl;
-  multiBoard: MultiBoardCtrl;
-  form: StudyFormCtrl;
-  members: StudyMemberCtrl;
-  chapters: StudyChaptersCtrl;
-  notif: NotifCtrl;
-  commentForm: CommentForm;
-  glyphForm: GlyphCtrl;
-  topics: TopicsCtrl;
-  serverEval: ServerEval;
-  share: StudyShareCtrl;
-  tags: TagsCtrl;
-  studyDesc: DescriptionCtrl;
-  chapterDesc: DescriptionCtrl;
-  search: SearchCtrl;
-  toggleLike(): void;
-  position(): Position;
-  isChapterOwner(): boolean;
-  canJumpTo(path: Tree.Path): boolean;
-  onJump(): void;
-  onFlip(): void;
-  withPosition<T>(obj: T): T & { ch: string; path: string };
-  setPath(path: Tree.Path, node: Tree.Node): void;
-  deleteNode(path: Tree.Path): void;
-  promote(path: Tree.Path, toMainline: boolean): void;
-  forceVariation(path: Tree.Path, force: boolean): void;
-  setChapter(id: string, force?: boolean): void;
-  toggleSticky(): void;
-  toggleWrite(): void;
-  isWriting(): boolean;
-  makeChange(...args: StudySocketSendParams): boolean;
-  startTour(): void;
-  userJump(path: Tree.Path): void;
-  currentNode(): Tree.Node;
-  practice?: StudyPracticeCtrl;
-  gamebookPlay(): GamebookPlayCtrl | undefined;
-  prevChapter(): StudyChapterMeta | undefined;
-  nextChapter(): StudyChapterMeta | undefined;
-  hasNextChapter(): boolean;
-  goToPrevChapter(): void;
-  goToNextChapter(): void;
-  mutateCgConfig(config: Required<Pick<CgConfig, 'drawable'>>): void;
-  isUpdatedRecently(): boolean;
-  setGamebookOverride(o: GamebookOverride): void;
-  explorerGame(gameId: string, insert: boolean): void;
-  onPremoveSet(): void;
-  looksNew(): boolean;
-  redraw: Redraw;
-  trans: Trans;
-}
+import type { Prop } from 'common';
+import type { AnalyseData } from '../interfaces';
+import type { GamebookOverride } from './gamebook/interfaces';
+import type { Opening } from '../explorer/interfaces';
+import type AnalyseCtrl from '../ctrl';
 
 export type Tab = 'intro' | 'members' | 'chapters';
+export type ChapterTab = 'init' | 'edit' | 'game' | 'fen' | 'pgn';
 export type ToolTab = 'tags' | 'comments' | 'glyphs' | 'serverEval' | 'share' | 'multiBoard';
-export type RelayTab = 'overview' | 'schedule' | 'leaderboard';
 export type Visibility = 'public' | 'unlisted' | 'private';
+export type ChapterId = string;
+export type TeamName = string;
+export type PointsStr = '1' | '0' | '½';
+export type GamePointsStr = '1-0' | '0-1' | '½-½' | '0-0' | '½-0' | '0-½';
+export type StatusStr = GamePointsStr | '*';
+export type ClockCentis = number;
+export type BothClocks = [ClockCentis?, ClockCentis?];
+export type FideId = number;
+
+export interface StudyTour {
+  study(ctrl: AnalyseCtrl): void;
+  chapter(cb: (tab: ChapterTab) => void): void;
+}
 
 export interface StudyVm {
   loading: boolean;
-  nextChapterId?: string;
-  justSetChapterId?: string;
+  nextChapterId?: ChapterId;
+  justSetChapterId?: ChapterId;
   tab: Prop<Tab>;
   toolTab: Prop<ToolTab>;
-  chapterId: string;
+  chapterId: ChapterId;
   mode: {
     sticky: boolean;
     write: boolean;
@@ -100,9 +38,12 @@ export interface StudyVm {
   gamebookOverride: GamebookOverride;
 }
 
+export type Federations = { [key: string]: string };
+
 export interface StudyData {
   id: string;
   name: string;
+  flair?: Flair;
   members: StudyMemberMap;
   position: Position;
   ownerId: string;
@@ -114,13 +55,17 @@ export interface StudyData {
   isNew?: boolean;
   liked: boolean;
   features: StudyFeatures;
-  chapters: StudyChapterMeta[];
   chapter: StudyChapter;
   secondsSinceUpdate: number;
   description?: string;
   topics?: Topic[];
   admin: boolean;
-  hideRatings?: boolean;
+  showRatings: boolean;
+  federations?: Federations;
+}
+
+export interface StudyDataFromServer extends StudyData {
+  chapters?: ChapterPreviewFromServer[];
 }
 
 export type Topic = string;
@@ -133,17 +78,17 @@ export interface StudySettings {
   cloneable: UserSelection;
   shareable: UserSelection;
   chat: UserSelection;
-  sticky: boolean;
-  description: boolean;
+  sticky?: boolean;
+  description?: boolean;
 }
 
 export interface ReloadData {
   analysis: AnalyseData;
-  study: StudyData;
+  study: StudyDataFromServer;
 }
 
 export interface Position {
-  chapterId: string;
+  chapterId: ChapterId;
   path: Tree.Path;
 }
 
@@ -154,15 +99,10 @@ export interface StudyFeatures {
   sticky: boolean;
 }
 
-export interface StudyChapterMeta {
+export interface StudyChapterConfig {
   id: string;
   name: string;
-  ongoing?: boolean;
-  res?: '1-0' | '0-1' | '½-½' | '*';
-}
-
-export interface StudyChapterConfig extends StudyChapterMeta {
-  orientation: Color;
+  orientation?: Color; // defaults to white
   description?: string;
   practice: boolean;
   gamebook: boolean;
@@ -170,7 +110,7 @@ export interface StudyChapterConfig extends StudyChapterMeta {
 }
 
 export interface StudyChapter {
-  id: string;
+  id: ChapterId;
   name: string;
   ownerId: string;
   setup: StudyChapterSetup;
@@ -180,19 +120,24 @@ export interface StudyChapter {
   gamebook: boolean;
   features: StudyChapterFeatures;
   description?: string;
-  relay?: StudyChapterRelay;
+  relayPath?: Tree.Path;
+  serverEval?: StudyChapterServerEval;
+}
+
+export interface StudyChapterServerEval {
+  done: boolean;
+  path: string;
 }
 
 export interface StudyChapterRelay {
   path: Tree.Path;
-  secondsSinceLastMove?: number;
   lastMoveAt?: number;
 }
 
 interface StudyChapterSetup {
   gameId?: string;
   variant: {
-    key: string;
+    key: VariantKey;
     name: string;
   };
   orientation: Color;
@@ -217,6 +162,14 @@ export interface StudyMemberMap {
   [id: string]: StudyMember;
 }
 
+export interface StudyPlayer {
+  name?: string;
+  title?: string;
+  rating?: number;
+  fideId?: FideId;
+  fed?: Federation;
+}
+
 export type TagTypes = string[];
 export type TagArray = [string, string];
 
@@ -224,26 +177,54 @@ export interface LocalPaths {
   [chapterId: string]: Tree.Path;
 }
 
-export interface ChapterPreview {
-  id: string;
+export interface ChapterPreviewBase {
+  id: ChapterId;
   name: string;
-  players?: {
-    white: ChapterPreviewPlayer;
-    black: ChapterPreviewPlayer;
-  };
-  orientation: Color;
-  fen: string;
+  status?: StatusStr;
   lastMove?: string;
-  lastMoveAt?: number;
-  playing: boolean;
-  outcome?: '1-0' | '0-1' | '½-½';
+  check?: '+' | '#';
 }
 
-export interface ChapterPreviewPlayer {
+export interface ChapterPreviewFromServer extends ChapterPreviewBase {
+  fen?: string; // defaults to initial
+  players?: PairOf<StudyPlayerFromServer>;
+  thinkTime?: number; // seconds since last move
+  orientation?: Color; // defaults to white
+  variant?: VariantKey; // defaults to standard
+}
+
+export interface ChapterPreview extends ChapterPreviewBase {
+  fen: string;
+  players?: StudyPlayers;
+  lastMoveAt?: number;
+  orientation: Color;
+  variant: VariantKey;
+  playing: boolean;
+}
+
+export interface StudyPlayers {
+  white: StudyPlayer;
+  black: StudyPlayer;
+}
+
+export type FederationId = string;
+export interface Federation {
+  id: FederationId;
   name: string;
+}
+export interface StudyPlayerBase {
+  name?: string;
   title?: string;
   rating?: number;
-  clock?: number;
+  clock?: ClockCentis;
+  fideId?: FideId;
+  team?: string;
+}
+export interface StudyPlayerFromServer extends StudyPlayerBase {
+  fed?: FederationId;
+}
+export interface StudyPlayer extends StudyPlayerBase {
+  fed?: Federation;
 }
 
 export type Orientation = 'black' | 'white' | 'auto';
@@ -253,7 +234,7 @@ export interface ChapterData {
   name: string;
   game?: string;
   variant?: VariantKey;
-  fen?: Fen | null;
+  fen?: FEN | null;
   pgn?: string;
   orientation: Orientation;
   mode: ChapterMode;
@@ -262,7 +243,7 @@ export interface ChapterData {
 }
 
 export interface EditChapterData {
-  id: string;
+  id: ChapterId;
   name: string;
   orientation: Orientation;
   mode: ChapterMode;
@@ -279,21 +260,32 @@ export interface AnaDests {
 export interface AnaMove {
   orig: string;
   dest: string;
-  fen: Fen;
+  fen: FEN;
   path: string;
   variant?: VariantKey;
   ch?: string;
-  promotion?: cg.Role;
+  promotion?: Role;
 }
 
 export interface AnaDrop {
-  role: cg.Role;
+  role: Role;
   pos: Key;
   variant?: VariantKey;
-  fen: Fen;
+  fen: FEN;
   path: string;
   ch?: string;
 }
+export interface ServerNodeMsg extends WithWhoAndPos {
+  n: Tree.NodeFromServer;
+  o: Opening;
+  s: boolean;
+  relayPath?: Tree.Path;
+}
+export interface ServerClockMsg extends WithWhoAndPos {
+  c?: number;
+  relayClocks?: PairOf<ClockCentis>;
+}
+
 export interface WithWho {
   w: {
     s: string;
@@ -306,8 +298,13 @@ export interface WithPosition {
 }
 
 export interface WithChapterId {
-  chapterId: string;
+  chapterId: ChapterId;
 }
 
 export type WithWhoAndPos = WithWho & WithPosition;
 export type WithWhoAndChap = WithWho & WithChapterId;
+
+export interface ChapterSelect {
+  is: (idOrNumber: ChapterId | number) => boolean;
+  set: (idOrNumber: ChapterId | number, force?: boolean) => Promise<boolean>;
+}

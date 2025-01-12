@@ -1,55 +1,58 @@
 package lila.coach
 
+import lila.core.perm.Granter
 import lila.db.dsl.{ *, given }
 import lila.memo.PicfitApi
-import lila.notify.NotifyApi
-import lila.security.Granter
-import lila.user.{ Me, User, UserRepo, UserPerfsRepo }
+import lila.rating.UserPerfsExt.bestStandardRating
 
 final class CoachApi(
     coachColl: Coll,
-    userRepo: UserRepo,
-    perfsRepo: UserPerfsRepo,
+    userRepo: lila.core.user.UserRepo,
+    userApi: lila.core.user.UserApi,
+    flagApi: lila.core.user.FlagApi,
     picfitApi: PicfitApi,
-    cacheApi: lila.memo.CacheApi,
-    notifyApi: NotifyApi
+    cacheApi: lila.memo.CacheApi
 )(using Executor):
 
   import BsonHandlers.given
 
-  def byId[U: UserIdOf](u: U): Fu[Option[Coach]] = coachColl.byId[Coach](u)
+  def byId[U: UserIdOf](u: U): Fu[Option[Coach]] = coachColl.byId[Coach](u.id)
 
   def find(username: UserStr): Fu[Option[Coach.WithUser]] =
-    userRepo byId username flatMapz find
+    userApi.byId(username).flatMapz(find)
 
-  def canCoach = Granter.of(_.Coach)
+  def canCoach = Granter.ofUser(_.Coach)
 
   def find(user: User): Fu[Option[Coach.WithUser]] =
     canCoach(user).so:
       byId(user.id).flatMapz: coach =>
-        perfsRepo.withPerfs(user) dmap coach.withUser dmap some
+        userApi.withPerfs(user).dmap(coach.withUser).dmap(some)
 
   def findOrInit(using me: Me): Fu[Option[Coach.WithUser]] =
     val user = me.value
     canCoach(user).so:
-      find(user) orElse perfsRepo.withPerfs(user).flatMap { user =>
+      find(user).orElse(userApi.withPerfs(user).flatMap { user =>
         val c = Coach.make(user).withUser(user)
-        coachColl.insert.one(c.coach) inject c.some
-      }
+        coachColl.insert.one(c.coach).inject(c.some)
+      })
 
   def isListedCoach(user: User): Fu[Boolean] =
     canCoach(user).so:
-      user.enabled.yes so user.marks.clean so coachColl.exists(
-        $id(user.id) ++ $doc("listed" -> true)
-      )
+      user.enabled.yes
+        .so(user.marks.clean)
+        .so(
+          coachColl.exists(
+            $id(user.id) ++ $doc("listed" -> true)
+          )
+        )
 
   def setSeenAt(user: User): Funit =
     canCoach(user).so:
       coachColl.update.one($id(user.id), $set("user.seenAt" -> nowInstant)).void
 
-  def setRating(u: User.WithPerfs): Funit =
-    canCoach(u.user).so:
-      perfsRepo.perfsOf(u.id).flatMap { perfs =>
+  def updateRatingFromDb(user: User): Funit =
+    canCoach(user).so:
+      userApi.perfsOf(user).flatMap { perfs =>
         coachColl.update.one($id(perfs.id), $set("user.rating" -> perfs.bestStandardRating)).void
       }
 
@@ -64,9 +67,10 @@ final class CoachApi(
 
   def uploadPicture(c: Coach.WithUser, picture: PicfitApi.FilePart): Funit =
     picfitApi
-      .uploadFile(s"coach:${c.coach.id}", picture, userId = c.user.id) flatMap { pic =>
-      coachColl.update.one($id(c.coach.id), $set("picture" -> pic.id)).void
-    }
+      .uploadFile(s"coach:${c.coach.id}", picture, userId = c.user.id)
+      .flatMap { pic =>
+        coachColl.update.one($id(c.coach.id), $set("picture" -> pic.id)).void
+      }
 
   private val languagesCache = cacheApi.unit[Set[String]]:
     _.refreshAfterWrite(1 hour).buildAsyncFuture: _ =>
@@ -74,13 +78,19 @@ final class CoachApi(
 
   def allLanguages: Fu[Set[String]] = languagesCache.get {}
 
-  private val countriesCache = cacheApi.unit[Set[String]]:
+  private val countriesCache = cacheApi.unit[CountrySelection]:
     _.refreshAfterWrite(1 hour).buildAsyncFuture: _ =>
+      import lila.core.user.Flag
       userRepo.coll.secondaryPreferred
-        .distinctEasy[String, Set](
+        .distinctEasy[Flag.Code, Set](
           "profile.country",
-          $doc("roles" -> lila.security.Permission.Coach.dbKey, "enabled" -> true)
+          $doc("roles" -> lila.core.perm.Permission.Coach.dbKey, "enabled" -> true)
         )
-  def allCountries: Fu[Set[String]] = countriesCache.get {}
+        .map: codes =>
+          ("all", "All countries") :: flagApi.all
+            .collect:
+              case f if codes.contains(f.code) && !flagApi.nonCountries.contains(f.code) => f.code -> f.name
+            .sortBy(_._2)
+        .map(CountrySelection(_))
 
-  private def withUser(user: User.WithPerfs)(coach: Coach) = Coach.WithUser(coach, user)
+  def countrySelection: Fu[CountrySelection] = countriesCache.get {}

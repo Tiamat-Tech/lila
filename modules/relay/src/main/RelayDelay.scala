@@ -1,24 +1,25 @@
 package lila.relay
 
-import lila.relay.RelayRound.Sync.UpstreamUrl
-import lila.memo.CacheApi
-import lila.common.Seconds
-import lila.db.dsl.{ *, given }
-import lila.study.MultiPgn
 import chess.format.pgn.PgnStr
+import io.mola.galimatias.URL
+import scalalib.model.Seconds
+
+import lila.db.dsl.{ *, given }
+import lila.memo.CacheApi
+import lila.study.MultiPgn
 
 final private class RelayDelay(colls: RelayColls)(using Executor):
 
   import RelayDelay.*
 
   def apply(
-      url: UpstreamUrl,
-      rt: RelayRound.WithTour,
-      doFetchUrl: (UpstreamUrl, Int) => Fu[RelayGames]
+      url: URL,
+      round: RelayRound,
+      doFetchUrl: URL => Fu[RelayGames]
   ): Fu[RelayGames] =
-    dedupCache(url, rt.round, () => doFetchUrl(url, RelayFetch.maxChapters(rt.tour)))
+    dedupCache(url, round, () => doFetchUrl(url))
       .flatMap: latest =>
-        rt.round.sync.delay match
+        round.sync.delayMinusLag match
           case Some(delay) if delay > 0 => store.get(url, delay).map(_ | latest.map(_.resetToSetup))
           case _                        => fuccess(latest)
 
@@ -28,54 +29,62 @@ final private class RelayDelay(colls: RelayColls)(using Executor):
 
     private val cache = CacheApi.scaffeineNoScheduler
       .initialCapacity(8)
-      .maximumSize(64)
-      .build[UpstreamUrl, GamesSeenBy]()
+      .maximumSize(256)
+      .build[String, GamesSeenBy]()
       .underlying
 
-    def apply(url: UpstreamUrl, round: RelayRound, doFetch: () => Fu[RelayGames]) =
+    def apply(url: URL, round: RelayRound, doFetch: () => Fu[RelayGames]) =
       cache.asMap
         .compute(
-          url,
+          url.toString,
           (_, v) =>
             Option(v) match
               case Some(GamesSeenBy(games, seenBy)) if !seenBy(round.id) =>
+                lila.mon.relay.dedup.increment()
+                logger.debug(s"Relay dedup cache hit ${round.id} ${round.name} ${url.toString}")
                 GamesSeenBy(games, seenBy + round.id)
               case _ =>
-                val futureGames = doFetch().addEffect: games =>
-                  if round.sync.hasDelay then store.putIfNew(url, games)
-                GamesSeenBy(futureGames, Set(round.id))
+                GamesSeenBy(doFetch(), Set(round.id))
         )
         .games
+        .addEffect: games =>
+          if round.sync.delayMinusLag.isDefined then store.putIfNew(url, games)
 
   private object store:
 
-    private def idOf(upstream: UpstreamUrl, at: Instant) = s"${upstream.url} ${at.toSeconds}"
-    private val longPast                                 = java.time.Instant.ofEpochMilli(0)
+    private def idOf(url: URL, at: Instant) = s"$url ${at.toSeconds}"
+    private val longPast                    = java.time.Instant.ofEpochMilli(0)
 
-    def putIfNew(upstream: UpstreamUrl, games: RelayGames): Funit =
+    def putIfNew(url: URL, games: RelayGames): Funit =
       val newPgn = RelayGame.iso.from(games).toPgnStr
-      getPgn(upstream, Seconds(0)).flatMap:
+      getLatestPgn(url).flatMap:
         case Some(latestPgn) if latestPgn == newPgn => funit
         case _ =>
-          val doc = $doc("_id" -> idOf(upstream, nowInstant), "at" -> nowInstant, "pgn" -> newPgn)
+          val now = nowInstant
+          val doc = $doc("_id" -> idOf(url, now), "at" -> now, "pgn" -> newPgn)
           colls.delay:
             _.insert.one(doc).void
 
-    def get(upstream: UpstreamUrl, delay: Seconds): Fu[Option[RelayGames]] =
-      getPgn(upstream, delay).map2: pgn =>
-        RelayGame.iso.to(MultiPgn.split(pgn, 999))
+    def get(url: URL, delay: Seconds): Fu[Option[RelayGames]] =
+      getPgn(url, delay).map2: pgn =>
+        RelayGame.iso.to(MultiPgn.split(pgn, Max(999)))
 
-    private def getPgn(upstream: UpstreamUrl, delay: Seconds): Fu[Option[PgnStr]] =
+    private def getLatestPgn(url: URL): Fu[Option[PgnStr]] =
+      getPgn(url, Seconds(0))
+
+    private def getPgn(url: URL, delay: Seconds): Fu[Option[PgnStr]] =
       colls.delay:
         _.find(
-          $doc("_id" $gt idOf(upstream, longPast) $lte idOf(upstream, nowInstant.minusSeconds(delay.value))),
+          $doc(
+            "_id".$gt(idOf(url, longPast)).$lte(idOf(url, nowInstant.minusSeconds(delay.value)))
+          ),
           $doc("pgn" -> true).some
-        ).sort($sort desc "_id")
+        ).sort($sort.desc("_id"))
           .one[Bdoc]
           .map:
             _.flatMap(_.getAsOpt[PgnStr]("pgn"))
 
 private object RelayDelay:
-  val maxSeconds = Seconds(1800)
+  val maxSeconds = Seconds(60 * 60)
 
   private case class GamesSeenBy(games: Fu[RelayGames], seenBy: Set[RelayRoundId])

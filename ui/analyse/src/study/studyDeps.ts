@@ -1,9 +1,8 @@
 import relayManager from './relay/relayManagerView';
-import relayTour from './relay/relayTourView';
 import renderPlayerBars from './playerBars';
-import makeStudy from './studyCtrl';
+import StudyCtrl from './studyCtrl';
 
-export { relayManager, relayTour, renderPlayerBars, makeStudy };
+export { relayManager, renderPlayerBars, StudyCtrl };
 
 export * as gbEdit from './gamebook/gamebookEdit';
 export * as gbPlay from './gamebook/gamebookPlayView';

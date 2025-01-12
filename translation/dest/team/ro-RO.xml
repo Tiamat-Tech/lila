@@ -12,7 +12,7 @@
   <string name="newTeam">Echipă nouă</string>
   <string name="myTeams">Echipele mele</string>
   <string name="noTeamFound">Nu s-a găsit nicio echipă</string>
-  <string name="joinTeam">Intră în echipă</string>
+  <string name="joinTeam" comment="Appears as a button on team pages, and on pages of tournaments that require you to be a member of that team (e.g. Swiss tournaments).&#10;&#10;Please keep as short as possible.">Intră în echipă</string>
   <string name="onlyLeaderLeavesTeam">Te rugăm să adaugi un nou lider de echipă înainte de a părăsi echipa, sau să desființezi echipa.</string>
   <string name="quitTeam">Ieşi din echipă</string>
   <string name="manuallyReviewAdmissionRequests">Verificați manual cererile de admitere</string>
@@ -46,7 +46,6 @@ Poți folosi asta pentru a suna jucătorii să intre într-un turneu sau o băt�
 Jucatorii carora nu le place să primească mesaje de la tine pot ieși din echipă.</string>
   <string name="teamsIlead">Echipe pe care le-am condus</string>
   <string name="youWayWantToLinkOneOfTheseTournaments">Ai vrea să legi unul dintre aceste turnee viitoare?</string>
-  <string name="usersWhoCanManageThisTeam">Utilizatori ce pot administra această echipă</string>
   <string name="leadersChat">Chat-ul liderilor</string>
   <string name="closeTeam">Închide echipa</string>
   <string name="closeTeamDescription">Închide echipa pentru totdeauna.</string>
@@ -54,9 +53,28 @@ Jucatorii carora nu le place să primească mesaje de la tine pot ieși din echi
   <string name="entryCodeDescriptionForLeader">(Opțional) Un cod de intrare pe care noii membri trebuie să îl cunoască pentru a se alătura acestei echipe.</string>
   <string name="incorrectEntryCode">Cod de intrare incorect.</string>
   <string name="teamAlreadyExists">Această echipă există deja.</string>
-  <string name="upcomingTourns">Turnee viitoare</string>
+  <string name="upcomingTournaments">Turnee viitoare</string>
   <string name="completedTourns">Turnee finalizate</string>
   <string name="declinedRequests">Cereri refuzate</string>
   <string name="joinLichessVariantTeam">Alătură-te echipei oficiale %s pentru știri și evenimente</string>
   <string name="teamPage">Pagina Echipei</string>
+  <string name="thisTeamBattleIsOver">Acest turneu s-a terminat, iar echipele nu mai pot fi actualizate.</string>
+  <string name="listTheTeamsThatWillCompete" comment="&quot;List&quot; is used as a verb in this sentence. You can alternatively translate as &quot;Fill out&quot;, as this is presented in the context of a form.">Listează echipele care vor concura în această luptă.</string>
+  <string name="oneTeamPerLine">O echipă pe linie. Utilizează completarea automată.</string>
+  <string name="oneTeamPerLineHelp">Puteți face copy-paste la această listă dintr-un turneu în altul!
+
+Nu puteți elimina o echipă dacă un jucător s-a alăturat deja turneului cu ea.</string>
+  <string name="numberOfLeadsPerTeam">Numărul de lideri per echipă. Suma scorului lor este scorul echipei.</string>
+  <string name="numberOfLeadsPerTeamHelp">Nu ar trebui să schimbați această valoare după ce turneul a început!</string>
+  <string name="innerTeam">Echipa interioară</string>
+  <plurals name="battleOfNbTeams">
+    <item quantity="one">Bătălia echipelor %s</item>
+    <item quantity="few">Bătălia echipelor %s</item>
+    <item quantity="other">Bătălia echipelor %s</item>
+  </plurals>
+  <plurals name="nbLeadersPerTeam">
+    <item quantity="one">Un lider per echipă</item>
+    <item quantity="few">%s lideri per echipă</item>
+    <item quantity="other">%s de lideri per echipă</item>
+  </plurals>
 </resources>

@@ -97,13 +97,25 @@
     <item quantity="one">%s qopal qáte</item>
     <item quantity="other">%s qopal qáte</item>
   </plurals>
+  <plurals name="numberBlunders" comment="Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;blunder&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;Blunder&quot; from another string, so please update as required.">
+    <item quantity="one">%s Qopal qáte</item>
+    <item quantity="other">%s Qopal qáte</item>
+  </plurals>
   <plurals name="nbMistakes">
     <item quantity="one">%s qáte</item>
     <item quantity="other">%s qáte</item>
   </plurals>
+  <plurals name="numberMistakes" comment="Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;mistake&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;mistake&quot; from another string, so please update as required.">
+    <item quantity="one">%s Qáte</item>
+    <item quantity="other">%s Qáte</item>
+  </plurals>
   <plurals name="nbInaccuracies">
     <item quantity="one">%s túsiniksizlik</item>
     <item quantity="other">%s túsiniksizlik</item>
+  </plurals>
+  <plurals name="numberInaccuracies" comment="Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;inaccuracy&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;Inaccuracy&quot; from another string, so please update as required.">
+    <item quantity="one">%s Túsiniksizlik</item>
+    <item quantity="other">%s Túsiniksizlik</item>
   </plurals>
   <string name="offerDraw">Pattı usınıs etiw</string>
   <string name="draw">Pat</string>
@@ -236,7 +248,6 @@
   <string name="block">Bloklaw</string>
   <string name="blocked">Bloklanǵan</string>
   <string name="unblock">Bloktan shıǵarıw</string>
-  <string name="followsYou">Sizge jazılǵan</string>
   <plurals name="nbFollowers">
     <item quantity="one">%s jazılıwshı</item>
     <item quantity="other">%s jazılıwshı</item>
@@ -259,7 +270,6 @@
   <string name="tournamentCalendar">Turnir kalendarı</string>
   <string name="conditionOfEntry">Qatnasıw shártleri:</string>
   <string name="advancedSettings">Qosımsha sazlawlar</string>
-  <string name="showAdvancedSettings">Qosımsha sazlawlardı kórsetiw</string>
   <string name="join">Qosılıw</string>
   <string name="withdraw">Oyınnan shıǵıw</string>
   <string name="wins">Jeńis</string>
@@ -272,7 +282,6 @@
   <string name="draws">Patlar</string>
   <string name="nextXTournament">Keyingi %s turnir:</string>
   <string name="profile">Profil</string>
-  <string name="tournamentWinners">Turnir jeńimpazları</string>
   <string name="name">Atı</string>
   <string name="description">Táriypi</string>
   <string name="descPrivate">Jeke táriyp</string>
@@ -339,7 +348,6 @@
   <string name="rapid">Tez</string>
   <string name="subscribe">Jazılıw</string>
   <string name="download">Júklep alıw</string>
-  <string name="welcome">Xosh keldińiz!</string>
   <string name="noRestriction">Sheklewsiz</string>
   <string name="simulHostcolor">Bas oyınshınıń hár bir oyın ushın taslar reńi</string>
   <string name="estimatedStart">Boljawlı baslanıw waqtı</string>

@@ -28,9 +28,11 @@
 
     /* not sure about that */
     &.patron {
-      @include rtl-mirrored;
-
       opacity: 0.8;
+
+      @include if-rtl {
+        transform: scaleX(-1);
+      }
     }
 
     &::before {
@@ -45,6 +47,11 @@
       content: $licon-Agent;
     }
   }
+  .rating {
+    body.no-rating & {
+      display: none;
+    }
+  }
 }
 
 a.user-link:hover {
@@ -57,5 +64,17 @@ a.user-link:hover {
 
   &[data-bot] {
     color: $c-bot;
+  }
+}
+
+.uflair {
+  @include prevent-select;
+  height: 1.1em;
+  vertical-align: middle;
+  margin-left: 0.5ch;
+  transform: translateY(-0.1em);
+  // keeps the username easily selectable
+  body.no-flair & {
+    display: none;
   }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="broadcasts">Трансляції</string>
+  <string name="myBroadcasts">Мої трансляції</string>
   <plurals name="nbBroadcasts">
     <item quantity="one">%s трансляція</item>
     <item quantity="few">%s трансляції</item>
@@ -8,32 +9,70 @@
     <item quantity="other">%s трансляцій</item>
   </plurals>
   <string name="liveBroadcasts">Онлайн трансляції турнірів</string>
+  <string name="broadcastCalendar">Календар трансляцій</string>
   <string name="newBroadcast">Нова трансляція</string>
-  <string name="addRound">Додати тур</string>
+  <string name="subscribedBroadcasts">Обрані трансляції</string>
+  <string name="aboutBroadcasts">Про трансляцію</string>
+  <string name="howToUseLichessBroadcasts">Як користуватися Lichess трансляціями.</string>
+  <string name="theNewRoundHelp">У новому раунді будуть ті самі учасники та редактори, що й у попередньому.</string>
+  <string name="addRound">Додати раунд</string>
   <string name="ongoing">Поточні</string>
   <string name="upcoming">Майбутні</string>
   <string name="completed">Завершені</string>
-  <string name="roundName">Назва туру</string>
-  <string name="roundNumber">Номер туру</string>
+  <string name="completedHelp">Lichess виявляє завершення раунду на основі ігор. Використовуйте цей перемикач якщо немає джерела.</string>
+  <string name="roundName">Назва раунду</string>
+  <string name="roundNumber">Номер раунду</string>
   <string name="tournamentName">Назва турніру</string>
   <string name="tournamentDescription">Короткий опис турніру</string>
   <string name="fullDescription">Повний опис події</string>
   <string name="fullDescriptionHelp">Необов\'язковий довгий опис трансляції. Наявна розмітка %1$s. Довжина має бути менша ніж %2$s символів.</string>
-  <string name="sourceUrlOrGameIds">URL джерела або ідентифікатор гри</string>
-  <string name="sourceUrlHelp">URL-адреса, яку Lichess перевірятиме, щоб отримати оновлення PGN. Вона має бути загальнодоступною в Інтернеті.</string>
-  <string name="gameIdsHelp">Крім того, ви можете ввести до 64 ідентифікаторів гри Lichess, розділених пробілами.</string>
-  <string name="startDate">Дата початку у вашому часовому поясі</string>
+  <string name="sourceSingleUrl" comment="An input box. The user can add the external URL the PGN playback of the game is coming from, to set up their event broadcast.&#10;&#10;Could be alternatively stated as &quot;Source URL for the PGN&quot;.">Адреса джерела PGN</string>
+  <string name="sourceUrlHelp">Посилання, яке Lichess перевірятиме, щоб отримати оновлення PGN. Воно має бути загальнодоступним в Інтернеті.</string>
+  <string name="sourceGameIds">До 64 ігрових ID Lichess, відокремлені пробілами.</string>
   <string name="startDateHelp">За бажанням, якщо ви знаєте, коли починається подія</string>
-  <string name="credits">Вдячність джерелу</string>
-  <string name="broadcastUrl">Посилання на трансляцію</string>
-  <string name="currentRoundUrl">Посилання на поточний тур</string>
   <string name="currentGameUrl">Посилання на поточну гру</string>
   <string name="downloadAllRounds">Завантажити всі тури</string>
-  <string name="resetRound">Скинути цей тур</string>
-  <string name="deleteRound">Видалити цей тур</string>
+  <string name="resetRound">Скинути цей раунд</string>
+  <string name="deleteRound">Видалити цей раунд</string>
   <string name="definitivelyDeleteRound">Видалити всі ігри цього раунду.</string>
   <string name="deleteAllGamesOfThisRound">Видалити всі ігри цього раунду. Джерело має бути активним для того, щоб повторно відтворити його.</string>
-  <string name="editRoundStudy">Редагувати дослідження туру</string>
+  <string name="editRoundStudy">Редагувати дослідження раунду</string>
   <string name="deleteTournament">Видалити турнір</string>
-  <string name="definitivelyDeleteTournament" comment="definitivelyDeleteTournament&#10;&#10;Confirmation prompt, when attempting to delete a broadcast on https://lichess.org/broadcast">Остаточно видалити весь турнір, всі його раунди та всі його ігри.</string>
+  <string name="definitivelyDeleteTournament">Остаточно видалити весь турнір, всі його раунди та всі його ігри.</string>
+  <string name="showScores" comment="An option for creating a broadcast (https://lichess.org/broadcast). This is optional, as scoring will be calculated automatically by Lichess, and some organisations prefer to do this manually or not show scores until the end - depending on how the tournament works.">Показувати результати гравців за результатами гри</string>
+  <string name="replacePlayerTags">За бажанням: замінити імена, рейтинги та титули гравців</string>
+  <string name="fideFederations">Федерації FIDE</string>
+  <string name="top10Rating">Топ 10 рейтингу</string>
+  <string name="fidePlayers">Гравці FIDE</string>
+  <string name="fidePlayerNotFound">Гравця FIDE не знайдено</string>
+  <string name="fideProfile">Профіль FIDE</string>
+  <string name="federation">Федерація</string>
+  <string name="ageThisYear">Вік цього року</string>
+  <string name="unrated" comment="Please do not translate simply as &quot;casual&quot;. &quot;Unrated&quot; here refers to tournaments that are organised outside of Lichess. The rating in question will usually align to a FIDE federation.">Без рейтингу</string>
+  <string name="recentTournaments">Нещодавні турніри</string>
+  <string name="openLichess" comment="Appears as a link when a Lichess broadcast is embedded in an external website. Clicking it will take the user to the Lichess website, to view it in full.&#10;&#10;For an example of what an embedded broadcast looks like, see https://lichess.org/developers under the section 'Embed a broadcast in your site'.">Відкрити в Lichess</string>
+  <string name="teams">Команди</string>
+  <string name="boards">Дошки</string>
+  <string name="overview">Огляд</string>
+  <string name="uploadImage">Завантажити зображення турніру</string>
+  <string name="noBoardsYet">Ще немає дощок. Вони з\'являться, коли ігри будуть завантажені.</string>
+  <string name="startVerySoon">Трансляція розпочнеться дуже скоро.</string>
+  <string name="notYetStarted">Трансляція ще не розпочалася.</string>
+  <string name="officialWebsite">Офіційний вебсайт</string>
+  <string name="standings">Турнірна таблиця</string>
+  <string name="officialStandings">Офіційна турнірна таблиця</string>
+  <string name="iframeHelp" comment="%s is 'webmasters page'">Більше опцій на %s</string>
+  <string name="embedThisBroadcast">Вбудувати цю трансляцію на своєму сайті</string>
+  <string name="embedThisRound">Вбудувати %s на своєму сайті</string>
+  <string name="ratingDiff">Різниця у рейтингу</string>
+  <string name="gamesThisTournament">Ігри в цьому турнірі</string>
+  <string name="score">Очки</string>
+  <string name="allTeams">Усі команди</string>
+  <string name="tournamentFormat">Формат турніру</string>
+  <string name="tournamentLocation">Місце турніру</string>
+  <string name="topPlayers">Найкращі гравці</string>
+  <string name="timezone">Часовий пояс</string>
+  <string name="fideRatingCategory">Категорія рейтингу FIDE</string>
+  <string name="optionalDetails">Додаткові деталі</string>
+  <string name="pastBroadcasts">Минулі трансляції</string>
 </resources>

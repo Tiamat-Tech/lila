@@ -2,7 +2,7 @@ package lila.ublog
 
 import bloomfilter.mutable.BloomFilter
 
-import lila.common.IpAddress
+import lila.core.net.IpAddress
 import lila.db.dsl.{ *, given }
 
 final class UblogViewCounter(colls: UblogColls)(using Executor):
@@ -16,7 +16,7 @@ final class UblogViewCounter(colls: UblogColls)(using Executor):
     if post.live then
       post.copy(views =
         val key = s"${post.id}:${ip.value}"
-        if bloomFilter mightContain key then post.views
+        if bloomFilter.mightContain(key) then post.views
         else
           bloomFilter.add(key)
           lila.mon.ublog.view(post.created.by.value).increment()

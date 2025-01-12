@@ -1,11 +1,9 @@
-import { winningChances, Eval } from 'ceval';
+import { winningChances, type Search } from 'ceval';
 import { path as treePath } from 'tree';
 import { detectThreefold } from '../nodeFinder';
 import { tablebaseGuaranteed } from '../explorer/explorerCtrl';
-import AnalyseCtrl from '../ctrl';
-import { Redraw } from '../interfaces';
-import { defined, prop, Prop } from 'common';
-import { altCastles } from 'chess';
+import type AnalyseCtrl from '../ctrl';
+import { defined, prop, type Prop, requestIdleCallback } from 'common';
 import { parseUci } from 'chessops/util';
 import { makeSan } from 'chessops/san';
 
@@ -46,6 +44,7 @@ export interface PracticeCtrl {
   hint(): void;
   currentNode(): Tree.Node;
   bottomColor(): Color;
+  search: Search;
   redraw: Redraw;
 }
 
@@ -55,7 +54,13 @@ export function make(root: AnalyseCtrl, playableDepth: () => number): PracticeCt
     comment = prop<Comment | null>(null),
     hovering = prop<{ uci: string } | null>(null),
     hinting = prop<Hinting | null>(null),
-    played = prop(false);
+    played = prop(false),
+    altCastles = {
+      e1a1: 'e1c1',
+      e1h1: 'e1g1',
+      e8a8: 'e8c8',
+      e8h8: 'e8g8',
+    };
 
   function commentable(node: Tree.Node, bonus = 0): boolean {
     if (node.tbhit || root.outcome(node)) return true;
@@ -68,8 +73,7 @@ export function make(root: AnalyseCtrl, playableDepth: () => number): PracticeCt
   function playable(node: Tree.Node): boolean {
     const ceval = node.ceval;
     return ceval
-      ? ceval.depth >= Math.min(ceval.maxDepth || 99, playableDepth()) ||
-          (ceval.depth >= 15 && (ceval.cloud || ceval.millis > 5000))
+      ? ceval.depth >= playableDepth() || (ceval.depth >= 15 && (ceval.cloud || ceval.millis > 5000))
       : false;
   }
 
@@ -94,10 +98,12 @@ export function make(root: AnalyseCtrl, playableDepth: () => number): PracticeCt
     if (outcome && outcome.winner) verdict = 'goodMove';
     else {
       const isFiftyMoves = node.fen.split(' ')[4] === '100';
-      const nodeEval: Eval =
+      const nodeEval: EvalScore =
         tbhitToEval(node.tbhit) ||
-        (node.threefold || (outcome && !outcome.winner) || isFiftyMoves ? { cp: 0 } : (node.ceval as Eval));
-      const prevEval: Eval = tbhitToEval(prev.tbhit) || prev.ceval!;
+        (node.threefold || (outcome && !outcome.winner) || isFiftyMoves
+          ? { cp: 0 }
+          : (node.ceval as EvalScore));
+      const prevEval: EvalScore = tbhitToEval(prev.tbhit) || prev.ceval!;
       const shift = -winningChances.povDiff(root.bottomColor(), nodeEval, prevEval);
 
       best = nodeBestUci(prev);
@@ -123,7 +129,7 @@ export function make(root: AnalyseCtrl, playableDepth: () => number): PracticeCt
         ? {
             uci: best,
             san: root.position(prev).unwrap(
-              pos => makeSan(pos, parseUci(best!)!),
+              pos => makeSan(pos, parseUci(best)!),
               _ => '--',
             ),
           }
@@ -193,7 +199,7 @@ export function make(root: AnalyseCtrl, playableDepth: () => number): PracticeCt
     checkCevalOrTablebase();
   }
 
-  lichess.requestIdleCallback(checkCevalOrTablebase, 800);
+  requestIdleCallback(checkCevalOrTablebase, 800);
 
   return {
     onCeval: checkCeval,
@@ -255,5 +261,6 @@ export function make(root: AnalyseCtrl, playableDepth: () => number): PracticeCt
     currentNode: () => root.node,
     bottomColor: root.bottomColor,
     redraw: root.redraw,
+    search: { by: { depth: 20 }, multiPv: 1, indeterminate: true },
   };
 }

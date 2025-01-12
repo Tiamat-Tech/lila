@@ -1,44 +1,43 @@
 package lila.security
 
 import play.api.mvc.RequestHeader
-import reactivemongo.akkastream.{ cursorProducer, AkkaStreamCursor }
+import reactivemongo.akkastream.{ AkkaStreamCursor, cursorProducer }
 import reactivemongo.api.bson.{ BSONDocumentHandler, BSONDocumentReader, BSONNull, Macros }
+
 import scala.concurrent.blocking
 
-import lila.common.{ ApiVersion, HTTPRequest, IpAddress }
+import lila.common.HTTPRequest
+import lila.core.net.{ ApiVersion, IpAddress, UserAgent }
+import lila.core.security.FingerHash
+import lila.core.socket.Sri
 import lila.db.dsl.{ *, given }
-import lila.user.User
-import lila.socket.Socket.Sri
 import lila.oauth.AccessToken
 
-final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
-    ec: Executor
-):
+final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using Executor):
 
   import Store.*
   import FingerHash.given
 
-  private val authCache = cacheApi[String, Option[AuthInfo]](65536, "security.authCache"):
+  private val authCache = cacheApi[String, Option[AuthInfo]](65_536, "security.authCache"):
     _.expireAfterAccess(5 minutes).buildAsyncFuture[String, Option[AuthInfo]]: id =>
       coll
         .find($doc("_id" -> id, "up" -> true), authInfoProjection.some)
         .one[Bdoc]
         .map:
           _.flatMap: doc =>
-            if doc.getAsOpt[Instant]("date").forall(_ isBefore nowInstant.minusHours(12)) then
+            if doc.getAsOpt[Instant]("date").forall(_.isBefore(nowInstant.minusHours(12))) then
               coll.updateFieldUnchecked($id(id), "date", nowInstant)
-            doc.getAsOpt[UserId]("user") map { AuthInfo(_, doc.contains("fp")) }
+            doc.getAsOpt[UserId]("user").map { AuthInfo(_, doc.contains("fp")) }
 
-  def authInfo(sessionId: String) = authCache get sessionId
+  def authInfo(sessionId: String) = authCache.get(sessionId)
 
   private val authInfoProjection = $doc("user" -> true, "fp" -> true, "date" -> true, "_id" -> false)
   private def uncache(sessionId: String) =
     blocking { blockingUncache(sessionId) }
   private def uncacheAllOf(userId: UserId): Funit =
-    coll.distinctEasy[String, Seq]("_id", $doc("user" -> userId)) map { ids =>
-      blocking {
-        ids foreach blockingUncache
-      }
+    coll.distinctEasy[String, Seq]("_id", $doc("user" -> userId)).map { ids =>
+      blocking:
+        ids.foreach(blockingUncache)
     }
   // blocks loading values! https://github.com/ben-manes/caffeine/issues/148
   private def blockingUncache(sessionId: String) =
@@ -50,26 +49,28 @@ final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
       req: RequestHeader,
       apiVersion: Option[ApiVersion],
       up: Boolean,
-      fp: Option[FingerPrint]
+      fp: Option[FingerPrint],
+      proxy: lila.core.security.IsProxy
   ): Funit =
     coll.insert
       .one:
         $doc(
-          "_id"  -> sessionId,
-          "user" -> userId,
-          "ip"   -> HTTPRequest.ipAddress(req),
-          "ua"   -> HTTPRequest.userAgent(req).fold("?")(_.value),
-          "date" -> nowInstant,
-          "up"   -> up,
-          "api"  -> apiVersion, // lichobile
-          "fp"   -> fp.flatMap(FingerHash.from)
+          "_id"   -> sessionId,
+          "user"  -> userId,
+          "ip"    -> HTTPRequest.ipAddress(req),
+          "ua"    -> HTTPRequest.userAgent(req).fold("?")(_.value),
+          "date"  -> nowInstant,
+          "up"    -> up,
+          "api"   -> apiVersion, // lichobile
+          "fp"    -> fp.flatMap(lila.security.FingerHash.from),
+          "proxy" -> proxy
         )
       .void
 
   private[security] def upsertOAuth(
       userId: UserId,
       tokenId: AccessToken.Id,
-      mobile: Option[Mobile.LichessMobileUa],
+      mobile: Option[lila.core.net.LichessMobileUa],
       req: RequestHeader
   ): Funit =
     val id = s"TOK-${tokenId.value.take(20)}"
@@ -112,43 +113,34 @@ final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
           "date" -> nowInstant,
           "up"   -> up,
           "api"  -> apiVersion,
-          "fp"   -> fp.flatMap(FingerHash.from).map(_.value).orElse(sri.map(_.value)),
+          "fp"   -> fp.flatMap(lila.security.FingerHash.from).map(_.value).orElse(sri.map(_.value)),
           "sri"  -> sri
         )
       .void
+
   def delete(sessionId: String): Funit =
-    coll.update
-      .one(
-        $id(sessionId),
-        $set("up" -> false)
-      )
-      .void andDo uncache(sessionId)
+    for _ <- coll.update.one($id(sessionId), $set("up" -> false))
+    yield uncache(sessionId)
 
   def closeUserAndSessionId(userId: UserId, sessionId: String): Funit =
-    coll.update
-      .one(
-        $doc("user" -> userId, "_id" -> sessionId, "up" -> true),
-        $set("up"   -> false)
-      )
-      .void andDo uncache(sessionId)
+    for _ <- coll.update.one($doc("user" -> userId, "_id" -> sessionId, "up" -> true), $set("up" -> false))
+    yield uncache(sessionId)
 
   def closeUserExceptSessionId(userId: UserId, sessionId: String): Funit =
-    coll.update
-      .one(
+    for _ <- coll.update.one(
         $doc("user" -> userId, "_id" -> $ne(sessionId), "up" -> true),
         $set("up"   -> false),
         multi = true
       )
-      .void >> uncacheAllOf(userId)
+    yield uncacheAllOf(userId)
 
   def closeAllSessionsOf(userId: UserId): Funit =
-    coll.update
-      .one(
+    for _ <- coll.update.one(
         $doc("user" -> userId, "up" -> true),
         $set("up"   -> false),
         multi = true
       )
-      .void >> uncacheAllOf(userId)
+    yield uncacheAllOf(userId)
 
   private given BSONDocumentHandler[UserSession] = Macros.handler[UserSession]
   def openSessions(userId: UserId, nb: Int): Fu[List[UserSession]] =
@@ -165,31 +157,32 @@ final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
       .cursor[UserSession](ReadPref.priTemp)
 
   def setFingerPrint(id: String, fp: FingerPrint): Fu[FingerHash] =
-    FingerHash.from(fp) match
+    lila.security.FingerHash.from(fp) match
       case None => fufail(s"Can't hash $id's fingerprint $fp")
       case Some(hash) =>
-        coll.updateField($id(id), "fp", hash) andDo {
-          authInfo(id).foreach:
+        for
+          _ <- coll.updateField($id(id), "fp", hash)
+          _ = authInfo(id).foreach:
             _.foreach: i =>
               authCache.put(id, fuccess(i.copy(hasFp = true).some))
-        } inject hash
+        yield hash
 
   def chronoInfoByUser(user: User): Fu[List[Info]] =
     coll
       .find(
         $doc(
           "user" -> user.id,
-          "date" $gt (user.createdAt atLeast nowInstant.minusYears(1))
+          "date".$gt(user.createdAt.atLeast(nowInstant.minusYears(1)))
         ),
         $doc("_id" -> false, "ip" -> true, "ua" -> true, "fp" -> true, "date" -> true).some
       )
-      .sort($sort desc "date")
+      .sort($sort.desc("date"))
       .cursor[Info]()
       .list(1000)
 
   // remains of never-confirmed accounts that got cleaned up
   private[security] def deletePreviousSessions(user: User) =
-    coll.delete.one($doc("user" -> user.id, "date" $lt user.createdAt)).void
+    coll.delete.one($doc("user" -> user.id, "date".$lt(user.createdAt))).void
 
   private case class DedupInfo(_id: String, ip: String, ua: String):
     def compositeKey = s"$ip $ua"
@@ -211,7 +204,7 @@ final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
           .groupBy(_.compositeKey)
           .view
           .values
-          .flatMap(_ drop 1)
+          .flatMap(_.drop(1))
           .filter(_._id != keepSessionId)
           .map(_._id)
         coll.delete.one($inIds(olds)).void
@@ -220,7 +213,7 @@ final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
   def shareAnIpOrFp(u1: UserId, u2: UserId): Fu[Boolean] =
     coll.aggregateExists(_.sec): framework =>
       import framework.*
-      Match($doc("user" $in List(u1, u2))) -> List(
+      Match($doc("user".$in(List(u1, u2)))) -> List(
         Limit(500),
         Project(
           $doc(
@@ -233,8 +226,8 @@ final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
         GroupField("x")("users" -> AddFieldToSet("user")),
         Match(
           $doc(
-            "_id" $ne BSONNull,
-            "users.1" $exists true
+            "_id".$ne(BSONNull),
+            "users.1".$exists(true)
           )
         ),
         Limit(1)
@@ -245,12 +238,12 @@ final class Store(val coll: Coll, cacheApi: lila.memo.CacheApi)(using
 
   private[security] def recentByIpExists(ip: IpAddress, since: FiniteDuration): Fu[Boolean] =
     coll.secondaryPreferred.exists:
-      $doc("ip" -> ip, "date" -> $gt(nowInstant minusMinutes since.toMinutes.toInt))
+      $doc("ip" -> ip, "date" -> $gt(nowInstant.minusMinutes(since.toMinutes.toInt)))
 
   private[security] def recentByPrintExists(fp: FingerPrint): Fu[Boolean] =
-    FingerHash.from(fp).so { hash =>
+    lila.security.FingerHash.from(fp).so { hash =>
       coll.secondaryPreferred.exists:
-        $doc("fp" -> hash, "date" -> $gt(nowInstant minusDays 7))
+        $doc("fp" -> hash, "date" -> $gt(nowInstant.minusDays(7)))
     }
 
 object Store:

@@ -1,6 +1,6 @@
 package lila.game
 
-import chess.Color
+import lila.core.game.PovRef
 
 /* Prev game ID -> Next game ID
  * The next game might not yet exist in the DB,
@@ -24,24 +24,24 @@ final class Rematches(idGenerator: IdGenerator)(using Executor):
 
   def prevGameIdOffering = offeredReverseLookup.getIfPresent
 
-  def get                         = cache.getIfPresent
-  def getOffered(prev: GameId)    = get(prev) collect { case o: NextGame.Offered => o }
-  def getAccepted(prev: GameId)   = get(prev) collect { case a: NextGame.Accepted => a }
+  inline def get                  = cache.getIfPresent
+  def getOffered(prev: GameId)    = get(prev).collect { case o: NextGame.Offered => o }
+  def getAccepted(prev: GameId)   = get(prev).collect { case a: NextGame.Accepted => a }
   def getAcceptedId(prev: GameId) = getAccepted(prev).map(_.nextId)
 
   def isOffering(pov: PovRef) = getOffered(pov.gameId).exists(_.by == pov.color)
 
   def offer(pov: PovRef): Fu[GameId] = (getOffered(pov.gameId) match
     case Some(existing) => fuccess(existing.copy(by = pov.color))
-    case None           => idGenerator.game map { NextGame.Offered(pov.color, _) }
-  ) map { offer =>
+    case None           => idGenerator.game.map { NextGame.Offered(pov.color, _) }
+  ).map { offer =>
     cache.put(pov.gameId, offer)
     offeredReverseLookup.put(offer.nextId, pov.gameId)
     offer.nextId
   }
 
   def drop(prev: GameId) =
-    get(prev) collect { case NextGame.Offered(_, nextId) => nextId } foreach offeredReverseLookup.invalidate
+    get(prev).collect { case NextGame.Offered(_, nextId) => nextId }.foreach(offeredReverseLookup.invalidate)
     cache.invalidate(prev)
 
   def accept(prev: GameId, next: GameId) =

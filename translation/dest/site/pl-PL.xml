@@ -5,6 +5,7 @@
   <string name="toInviteSomeoneToPlayGiveThisUrl">Przekaż ten adres, by zaprosić kogoś do wspólnej gry</string>
   <string name="gameOver">Partia zakończona</string>
   <string name="waitingForOpponent">Oczekiwanie na ruch przeciwnika</string>
+  <string name="orLetYourOpponentScanQrCode">Lub pozwól przeciwnikowi zeskanować ten kod QR</string>
   <string name="waiting">Oczekiwanie</string>
   <string name="yourTurn">Twój ruch</string>
   <string name="aiNameLevelAiLevel">%1$s poziom %2$s</string>
@@ -45,7 +46,7 @@
   <string name="opponentLeftChoices">Przeciwnik opuścił grę. Możesz ogłosić swoje zwycięstwo, uznać partię za nierozstrzygniętą lub poczekać.</string>
   <string name="forceResignation">Ogłoś wygraną</string>
   <string name="forceDraw">Ogłoś remis</string>
-  <string name="talkInChat">Bądź miły na czacie</string>
+  <string name="talkInChat">Zachowuj się miło na czacie!</string>
   <string name="theFirstPersonToComeOnThisUrlWillPlayWithYou">Pierwsza osoba, która przejdzie pod ten adres, dołączy do Twojej partii.</string>
   <string name="whiteResigned">Białe poddały się</string>
   <string name="blackResigned">Czarne poddały się</string>
@@ -71,7 +72,10 @@
   <string name="promoteVariation">Promuj ten wariant</string>
   <string name="makeMainLine">Promuj na główny wariant</string>
   <string name="deleteFromHere">Usuń od tego miejsca</string>
-  <string name="forceVariation">Przedstaw jako wariant</string>
+  <string name="collapseVariations">Zwiń warianty</string>
+  <string name="expandVariations">Rozwiń warianty</string>
+  <string name="forceVariation">Zamień w wariant</string>
+  <string name="copyVariationPgn">Skopiuj wariant PGN</string>
   <string name="move">Ruch</string>
   <string name="variantLoss">Wariant przegrywający</string>
   <string name="variantWin">Wariant wygrywający</string>
@@ -103,7 +107,7 @@
   <string name="openingExplorer">Biblioteka otwarć</string>
   <string name="openingEndgameExplorer">Biblioteka otwarć i końcówek</string>
   <string name="xOpeningExplorer">Biblioteka otwarć %s</string>
-  <string name="playFirstOpeningEndgameExplorerMove">Zagraj pierwsze posunięcie z przeglądarki otwarć/końcówek</string>
+  <string name="playFirstOpeningEndgameExplorerMove">Zagraj pierwsze posunięcie z biblioteki otwarć</string>
   <string name="winPreventedBy50MoveRule">Bez wygranej ze względu na regułę 50 ruchów</string>
   <string name="lossSavedBy50MoveRule">Bez przegranej ze względu na regułę 50 ruchów</string>
   <string name="winOr50MovesByPriorMistake">Zwycięstwo lub 50 posunięć bez rozstrzygnięcia</string>
@@ -116,7 +120,6 @@
   <string name="replayMode">Tryb odtwarzania</string>
   <string name="realtimeReplay">Jak w grze</string>
   <string name="byCPL">Wg SCP</string>
-  <string name="openStudy">Otwórz opracowanie</string>
   <string name="enable">Włącz</string>
   <string name="bestMoveArrow">Strzałka najlepszego ruchu</string>
   <string name="showVariationArrows">Pokaż strzałki wariantów</string>
@@ -126,11 +129,16 @@
   <string name="memory">Pamięć RAM</string>
   <string name="infiniteAnalysis">Nieskończona analiza</string>
   <string name="removesTheDepthLimit">Usuwa limit głębokości analizy i rozgrzewa Twój komputer do czerwoności ;)</string>
-  <string name="engineManager">Ustawienia silnika</string>
   <string name="blunder">Błąd</string>
   <string name="mistake">Pomyłka</string>
   <string name="inaccuracy">Niedokładność</string>
   <plurals name="nbBlunders">
+    <item quantity="one">%s błąd</item>
+    <item quantity="few">%s błędy</item>
+    <item quantity="many">%s błędów</item>
+    <item quantity="other">%s błędów</item>
+  </plurals>
+  <plurals name="numberBlunders" comment="%s is a number, but not used within the string. We represent these as a table and we just need %s in the string to determine what text to use, depending on the amount.&#10;&#10;Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;blunder&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;Blunder&quot; from another string, so please update as required.">
     <item quantity="one">%s błąd</item>
     <item quantity="few">%s błędy</item>
     <item quantity="many">%s błędów</item>
@@ -142,7 +150,19 @@
     <item quantity="many">%s pomyłek</item>
     <item quantity="other">%s pomyłek</item>
   </plurals>
+  <plurals name="numberMistakes" comment="%s is a number, but not used within the string. We represent these as a table and we just need %s in the string to determine what text to use, depending on the amount.&#10;&#10;Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;mistake&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;mistake&quot; from another string, so please update as required.">
+    <item quantity="one">%s pomyłka</item>
+    <item quantity="few">%s pomyłki</item>
+    <item quantity="many">%s pomyłek</item>
+    <item quantity="other">%s pomyłek</item>
+  </plurals>
   <plurals name="nbInaccuracies">
+    <item quantity="one">%s niedokładność</item>
+    <item quantity="few">%s niedokładności</item>
+    <item quantity="many">%s niedokładności</item>
+    <item quantity="other">%s niedokładności</item>
+  </plurals>
+  <plurals name="numberInaccuracies" comment="%s is a number, but not used within the string. We represent these as a table and we just need %s in the string to determine what text to use, depending on the amount.&#10;&#10;Appears on computer analysis results.&#10;&#10;Please note this string was updated to start with a capital letter. It previously had &quot;inaccuracy&quot; in lowercase. It was pre-translated, but the translation memory may have chosen &quot;Inaccuracy&quot; from another string, so please update as required.">
     <item quantity="one">%s niedokładność</item>
     <item quantity="few">%s niedokładności</item>
     <item quantity="many">%s niedokładności</item>
@@ -194,6 +214,7 @@
   <string name="latestForumPosts">Najnowsze wpisy</string>
   <string name="players">Gracze</string>
   <string name="friends">Znajomi</string>
+  <string name="otherPlayers">inni gracze</string>
   <string name="discussions">Rozmowy</string>
   <string name="today">Dzisiaj</string>
   <string name="yesterday">Wczoraj</string>
@@ -285,6 +306,7 @@
     <item quantity="many">%s partii z Tobą</item>
     <item quantity="other">%s partii z Tobą</item>
   </plurals>
+  <string name="ok">OK</string>
   <string name="cancel">Anuluj</string>
   <string name="whiteTimeOut">Upłynął czas białych</string>
   <string name="blackTimeOut">Upłynął czas czarnych</string>
@@ -301,10 +323,10 @@
   <string name="playingRightNow">W toku</string>
   <string name="eventInProgress">W toku</string>
   <string name="finished">Zakończone</string>
-  <string name="finishesX">kończy się %s</string>
   <string name="abortGame">Przerwij partię</string>
   <string name="gameAborted">Partia została przerwana</string>
   <string name="standard">Standard</string>
+  <string name="customPosition">Niestandardowa pozycja</string>
   <string name="unlimited">Bez limitu</string>
   <string name="mode">Rodzaj</string>
   <string name="casual">Towarzyska</string>
@@ -437,10 +459,10 @@
   <string name="mustBeInTeam">Musisz należeć do klubu %s</string>
   <string name="youAreNotInTeam">Nie należysz do klubu %s</string>
   <string name="backToGame">Wróć do partii</string>
-  <string name="siteDescription">Darmowe szachy online. Zagraj w szachy o przyjaznym interfejsie. Bez rejestracji, bez reklam, bez wtyczek. Zagraj w szachy z komputerem, znajomymi lub losowo wybranymi przeciwnikami.</string>
+  <string name="siteDescription">Proste w obsłudze szachy online dla wszystkich. Nie trzeba zakładać konta, nie ma reklam, bez instalacji. Możesz grać z komputerem, z kimś, kogo znasz - albo z nieznajomymi.</string>
   <string name="xJoinedTeamY">%1$s dołączył do klubu %2$s</string>
   <string name="xCreatedTeamY">%1$s założył klub %2$s</string>
-  <string name="startedStreaming">rozpoczął streaming</string>
+  <string name="startedStreaming">rozpoczyna nadawanie na żywo</string>
   <string name="xStartedStreaming">%s rozpoczął streaming</string>
   <string name="averageElo">Średni ranking</string>
   <string name="location">Miejsce</string>
@@ -460,6 +482,7 @@
   <string name="importGame">Importuj partię</string>
   <string name="importGameExplanation">Wklejenie PGN partii daje możliwość jej odtworzenia, analizy komputerowej, rozmowy i udostępnienia.</string>
   <string name="importGameCaveat">Warianty zostaną usunięte. Aby je zachować, zaimportuj plik PGN jako opracowanie.</string>
+  <string name="importGameDataPrivacyWarning">Ten zapis PGN będzie dostępny publicznie. Aby zaimportować partię tylko dla siebie, stwórz prywatne opracowanie.</string>
   <plurals name="nbImportedGames">
     <item quantity="one">%s zaimportowana partia</item>
     <item quantity="few">%s zaimportowana partie</item>
@@ -474,6 +497,7 @@
   <string name="blackCheckmatesInOneMove">Czarne dają mata w jednym ruchu</string>
   <string name="retry">Spróbuj jeszcze raz</string>
   <string name="reconnecting">Ponowne łączenie</string>
+  <string name="noNetwork">Offline</string>
   <plurals name="nbFriendsOnline">
     <item quantity="one">%s znajomy online</item>
     <item quantity="few">%s znajomych online</item>
@@ -489,7 +513,6 @@
   <string name="block">Zablokuj</string>
   <string name="blocked">Zablokowany</string>
   <string name="unblock">Odblokuj</string>
-  <string name="followsYou">Obserwuje Cię</string>
   <string name="xStartedFollowingY">%1$s obserwuje %2$s</string>
   <plurals name="nbFollowers">
     <item quantity="one">%s obserwujący</item>
@@ -527,9 +550,6 @@
   <string name="safeTournamentName">Nadaj turniejowi neutralną nazwę.</string>
   <string name="inappropriateNameWarning">Nawet nieco nieodpowiednia nazwa może spowodować zamknięcie Twojego konta.</string>
   <string name="emptyTournamentName">Jeśli nie podasz nazwy turnieju, zostanie on nazwany od nazwiska losowo wybranego arcymistrza.</string>
-  <string name="recommendNotTouching">Zalecamy nie zmieniać tych ustawień.</string>
-  <string name="fewerPlayers">Ustawienie warunków wstępu sprawi, że do turnieju przystąpi mniej osób.</string>
-  <string name="showAdvancedSettings">Pokaż ustawienia zaawansowane</string>
   <string name="makePrivateTournament">Ustaw turniej jako prywatny i ogranicz dostęp za pomocą hasła</string>
   <string name="join">Dołącz</string>
   <string name="withdraw">Wycofaj się</string>
@@ -550,6 +570,7 @@
   <string name="movesPlayed">Wykonanych ruchów</string>
   <string name="whiteWins">Wygranych białych</string>
   <string name="blackWins">Wygranych czarnych</string>
+  <string name="drawRate">Częstość remisowania</string>
   <string name="draws">Remisów</string>
   <string name="nextXTournament">Następny turniej %s:</string>
   <string name="averageOpponent">Średni ranking przeciwnika</string>
@@ -568,10 +589,12 @@
   <string name="ifNoneLeaveEmpty">Jeśli nie masz, zostaw puste</string>
   <string name="profile">Profil</string>
   <string name="editProfile">Edycja profilu</string>
-  <string name="firstName">Imię</string>
-  <string name="lastName">Nazwisko</string>
+  <string name="realName">Prawdziwe nazwisko</string>
+  <string name="setFlair">Ustaw swój emblemat</string>
+  <string name="flair">Emblemat</string>
+  <string name="youCanHideFlair">Istnieje ustawienie, pozwalające ukryć wszystkie emblematy użytkowników na lichess.</string>
   <string name="biography">O mnie</string>
-  <string name="flag" comment="flag&#10;Appears when you edit your profile. Lets a player add a country/flag (not all flags are for countries) to their profile">Flaga</string>
+  <string name="countryRegion" comment="flag&#10;Appears when you edit your profile. Lets a player add a country/flag (not all flags are for countries) to their profile">Kraj lub region</string>
   <string name="thankYou">Dziękujemy!</string>
   <string name="socialMediaLinks">Linki do mediów społecznościowych</string>
   <string name="oneUrlPerLine">Jeden adres URL na linię.</string>
@@ -592,13 +615,15 @@
   <string name="automaticallyProceedToNextGameAfterMoving">Po ruchu automatycznie przejdź do kolejnej partii</string>
   <string name="autoSwitch">Przełącz po ruchu</string>
   <string name="puzzles">Zadania szachowe</string>
-  <string name="tournamentWinners">Zwycięzcy turniejów</string>
+  <string name="onlineBots">Boty online</string>
   <string name="name">Nazwa</string>
   <string name="description">Opis</string>
   <string name="descPrivate">Prywatny opis</string>
   <string name="descPrivateHelp">Tekst widoczny tylko dla członków klubu. Jeśli jest ustawiony, zastępuje publiczny opis dla członków klubu.</string>
   <string name="no">Nie</string>
   <string name="yes">Tak</string>
+  <string name="website">Strona internetowa</string>
+  <string name="mobile">Aplikacja mobilna</string>
   <string name="help">Porada:</string>
   <string name="createANewTopic">Załóż nowy temat</string>
   <string name="topics">Liczba tematów</string>
@@ -615,11 +640,11 @@
   <string name="reason">Powód</string>
   <string name="whatIsIheMatter">Jakie to ma znaczenie?</string>
   <string name="cheat">Oszust</string>
-  <string name="insult">Znieważenie</string>
   <string name="troll">Natręt (troll)</string>
-  <string name="ratingManipulation">Manipulacja rankingiem</string>
   <string name="other">Inne</string>
-  <string name="reportDescriptionHelp">Wklej odnośnik do partii i wyjaśnij, co złego jest w zachowaniu tego użytkownika. Nie pisz tylko, że „oszukuje”, ale wytłumacz nam, na jakiej podstawie doszedłeś/aś do takiego wniosku. Odniesiemy się do twojego zgłoszenia szybciej, jeżeli napiszesz je w języku angielskim.</string>
+  <string name="reportCheatBoostHelp">Wklej link do partii i wytłumacz, co złego jest w zachowaniu tego użytkownika. Nie pisz tylko \"on oszukiwał\", lecz napisz jak doszedłeś/aś do tego wniosku.</string>
+  <string name="reportUsernameHelp">Wytłumacz, co w nazwie użytkownika jest obraźliwe. Nie pisz tylko \"nazwa jest obraźliwa\", lecz napisz jak doszedłeś/aś do tego wniosku, zwłaszcza jeśli jest mało znany, nie po angielsku, slangowy lub odniesieniem do kultury/historii.</string>
+  <string name="reportProcessedFasterInEnglish">Twoje zgłoszenie będzie sprawdzone szybciej, jeśli zostanie napisane po angielsku.</string>
   <string name="error.provideOneCheatedGameLink">Podaj przynajmniej jeden odnośnik do gry, w której oszukiwano.</string>
   <string name="by">autor %s</string>
   <string name="importedByX">Zaimportowane przez %s</string>
@@ -652,6 +677,7 @@
   <string name="slow">Wolno</string>
   <string name="insideTheBoard">Na szachownicy</string>
   <string name="outsideTheBoard">Poza szachownicą</string>
+  <string name="allSquaresOfTheBoard">Wszystkie pola szachownicy</string>
   <string name="onSlowGames">W wolniejszych partiach</string>
   <string name="always">Zawsze</string>
   <string name="never">Nigdy</string>
@@ -731,8 +757,10 @@
   <string name="simultaneousExhibitions">Symultany</string>
   <string name="host">Symultanista</string>
   <string name="hostColorX">Kolor symultanisty: %s</string>
+  <string name="yourPendingSimuls">Twoje oczekujące symultany</string>
   <string name="createdSimuls">Nowe symultany</string>
   <string name="hostANewSimul">Nowa symultana</string>
+  <string name="signUpToHostOrJoinASimul">Dołącz do simultany</string>
   <string name="noSimulFound">Nie znaleziono symultany</string>
   <string name="noSimulExplanation">Taka symultana nie istnieje</string>
   <string name="returnToSimulHomepage">Wróć do do strony głównej symultan</string>
@@ -757,6 +785,7 @@
   <string name="keyboardShortcuts">Skróty klawiaturowe</string>
   <string name="keyMoveBackwardOrForward">idź wstecz/do przodu</string>
   <string name="keyGoToStartOrEnd">idź na początek/koniec</string>
+  <string name="keyCycleSelectedVariation">Powtarzaj wybrany wariant</string>
   <string name="keyShowOrHideComments">pokaż/ukryj komentarze</string>
   <string name="keyEnterOrExitVariation">wejdź/opuść wariant</string>
   <string name="keyRequestComputerAnalysis">Poproś o analizę komputerową, ucz się na swoich błędach</string>
@@ -764,6 +793,14 @@
   <string name="keyNextBlunder">Następny błąd</string>
   <string name="keyNextMistake">Następna pomyłka</string>
   <string name="keyNextInaccuracy">Następna niedokładność</string>
+  <string name="keyPreviousBranch">Poprzedni wariant</string>
+  <string name="keyNextBranch">Następny wariant</string>
+  <string name="toggleVariationArrows">Pokaż strzałki wariantów</string>
+  <string name="cyclePreviousOrNextVariation">Powtarzaj poprzedni/następny wariant</string>
+  <string name="toggleGlyphAnnotations">Przełącz adnotacje symbolami</string>
+  <string name="togglePositionAnnotations">Przełącz adnotacje pozycji</string>
+  <string name="variationArrowsInfo">Strzałki wariantów pozwalają nawigować bez użycia listy posunięć.</string>
+  <string name="playSelectedMove">wykonaj wybrane posunięcie</string>
   <string name="newTournament">Nowy turniej</string>
   <string name="tournamentHomeTitle">Turnieje szachowe z możliwością rozgrywki w różnym tempie i odmianach szachów</string>
   <string name="tournamentHomeDescription">Weź udział w turniejach szachowych online! Dołącz do istniejącego turnieju lub stwórz własny. Błyskawiczne, szybkie, klasyczne, Fishera, król w centrum, trzy szachy i wiele innych opcji, aby szachowa zabawa trwała w nieskończoność.</string>
@@ -808,6 +845,7 @@
   <string name="withFriends">Tylko znajomym</string>
   <string name="withEverybody">Każdemu</string>
   <string name="kidMode">Tryb dla dzieci</string>
+  <string name="kidModeIsEnabled">Tryb dla dzieci jest włączony.</string>
   <string name="kidModeExplanation">Chodzi o bezpieczeństwo. W trybie dla dzieci możliwość komunikacji w serwisie jest wyłączona. Włącz go na rzecz swoich dzieci, czy uczniów, by chronić ich przed możliwymi zagrożeniami ze strony innych użytkowników internetu.</string>
   <string name="inKidModeTheLichessLogoGetsIconX">W trybie dla dzieci logo lichess ma dodatkową ikonę %s, wiesz wtedy, że Twoje dziecko jest chronione.</string>
   <string name="askYourChessTeacherAboutLiftingKidMode">Twoim kontem zarządza nauczyciel. Poproś go o przekazanie zarządzania Tobie.</string>
@@ -849,9 +887,12 @@
   <string name="transparent">Przezroczyste</string>
   <string name="deviceTheme">Motyw urządzenia</string>
   <string name="backgroundImageUrl">Adres do obrazu tła:</string>
-  <string name="boardGeometry">Szachownica</string>
-  <string name="boardTheme">Kolory pól</string>
-  <string name="boardSize">Rozmiar szachownicy</string>
+  <string name="board">Szachownica</string>
+  <string name="size">Rozmiar</string>
+  <string name="opacity">Przezroczystość</string>
+  <string name="brightness">Jasność</string>
+  <string name="hue">Odcień</string>
+  <string name="boardReset">Przywróć domyślne kolory</string>
   <string name="pieceSet">Zestaw bierek</string>
   <string name="embedInYourWebsite">Osadź na swojej stronie internetowej</string>
   <string name="usernameAlreadyUsed">Ta nazwa użytkownika jest już zajęta, wybierz inną.</string>
@@ -929,9 +970,10 @@
     <item quantity="many">i zapisz %s wariantów warunkowych</item>
     <item quantity="other">i zapisz %s wariantów warunkowych</item>
   </plurals>
+  <string name="showUnreadLichessMessage" comment="Appears prominently on the home page when a player receives a message from the Lichess account: https://lichess.org/@/Lichess">Otrzymałeś prywatną wiadomość od Lichess.</string>
+  <string name="clickHereToReadIt">Kliknij tutaj, aby ją odczytać</string>
   <string name="sorry">Przykro nam :(</string>
   <string name="weHadToTimeYouOutForAWhile">Na pewien czas musieliśmy wykluczyć Cię z gry.</string>
-  <string name="timeoutExpires">Wykluczenie skończy się %s.</string>
   <string name="why">Dlaczego?</string>
   <string name="pleasantChessExperience">Naszym celem jest zapewnienie wszystkim przyjemności z gry.</string>
   <string name="goodPractice">W tym celu musimy zapewnić przestrzeganie dobrych praktyk przez wszystkich graczy.</string>
@@ -951,6 +993,8 @@
   <string name="agreementPolicy">Zgadzam się przestrzegać wszystkich zasad Lichess.</string>
   <string name="searchOrStartNewDiscussion">Szukaj lub rozpocznij nową rozmowę</string>
   <string name="edit">Edytuj</string>
+  <string name="bullet" comment="Probably best left untranslated. Leave it as 'Bullet' unless your language has a better word for it.">Bullet</string>
+  <string name="blitz" comment="Probably best left untranslated. Leave it as 'Blitz' unless your language has a better word for it.">Blitz</string>
   <string name="rapid">Szybkie</string>
   <string name="classical">Klasyczne</string>
   <string name="ultraBulletDesc">Partie szalenie szybkie: mniej niż 30 sekund</string>
@@ -990,9 +1034,6 @@
   <string name="timeAlmostUp">Czas prawie minął!</string>
   <string name="clickToRevealEmailAddress">[Kliknij, aby ujawnić adres e-mail]</string>
   <string name="download">Pobierz</string>
-  <string name="welcome">Witaj!</string>
-  <string name="lichessPatronInfo">Lichess jest organizacją niedochodową i całkowicie darmowym otwartym oprogramowaniem.
-Wszystkie koszty operacyjne, rozwój i treści są finansowane wyłącznie z darowizn użytkowników.</string>
   <string name="coachManager">Menedżer trenera</string>
   <string name="streamerManager">Menedżer streamera</string>
   <string name="cancelTournament">Anuluj turniej</string>
@@ -1005,8 +1046,6 @@ na ranking graczy</string>
   <string name="minimumRatedGames">Minimalna liczba partii rankingowych</string>
   <string name="minimumRating">Minimalny ranking</string>
   <string name="maximumWeeklyRating">Maksymalny tygodniowy ranking</string>
-  <string name="onlyTitled">Tylko gracze z tytułem</string>
-  <string name="onlyTitledHelp">Wymagaj oficjalnego tytułu, aby dołączyć do turnieju</string>
   <string name="positionInputHelp">Wklej poprawny FEN, aby rozpocząć każdą partię z danej pozycji.
 Działa tylko dla standardowych gier, nie działa dla wariantów.
 Możesz użyć %s , aby wygenerować pozycję FEN, a następnie wkleić ją tutaj.
@@ -1051,4 +1090,10 @@ Pozostaw puste, aby rozpoczynać partie z normalnej pozycji początkowej.</strin
   <string name="switchSides">Zmień kolor</string>
   <string name="closingAccountWithdrawAppeal">Zamknięcie konta spowoduje wycofanie Twojego odwołania</string>
   <string name="ourEventTips">Nasze wskazówki dotyczące organizacji wydarzeń</string>
+  <string name="instructions">Instrukcje</string>
+  <string name="showMeEverything">Pokaż mi wszystko</string>
+  <string name="lichessPatronInfo">Lichess jest organizacją niedochodową i całkowicie darmowym otwartym oprogramowaniem.
+Wszystkie koszty operacyjne, rozwój i treści są finansowane wyłącznie z darowizn użytkowników.</string>
+  <string name="nothingToSeeHere">W tej chwili nie ma nic do zobaczenia.</string>
+  <string name="stats">Statystyki</string>
 </resources>

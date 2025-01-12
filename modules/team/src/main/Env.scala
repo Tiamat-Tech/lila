@@ -3,32 +3,26 @@ package lila.team
 import akka.actor.*
 import com.softwaremill.macwire.*
 
-import lila.common.config.*
-import lila.mod.ModlogApi
-import lila.notify.NotifyApi
-import lila.socket.{ GetVersion, SocketVersion }
+import lila.core.config.*
+import lila.core.socket.{ GetVersion, SocketVersion }
 
 @Module
-@annotation.nowarn("msg=unused")
 final class Env(
-    captcher: lila.hub.actors.Captcher,
-    timeline: lila.hub.actors.Timeline,
-    teamSearch: lila.hub.actors.TeamSearch,
-    userRepo: lila.user.UserRepo,
-    userApi: lila.user.UserApi,
-    modLog: ModlogApi,
-    notifyApi: NotifyApi,
-    remoteSocketApi: lila.socket.RemoteSocket,
-    chatApi: lila.chat.ChatApi,
+    captcha: lila.core.captcha.CaptchaApi,
+    userApi: lila.core.user.UserApi,
+    flairApi: lila.core.user.FlairApi,
+    notifyApi: lila.core.notify.NotifyApi,
+    socketKit: lila.core.socket.SocketKit,
+    chat: lila.core.chat.ChatApi,
     cacheApi: lila.memo.CacheApi,
-    lightUserApi: lila.user.LightUserApi,
-    userJson: lila.user.JsonView,
+    lightUserApi: lila.core.user.LightUserApi,
+    userJson: lila.core.user.JsonView,
     db: lila.db.Db
-)(using Executor, ActorSystem, play.api.Mode, akka.stream.Materializer):
+)(using Executor, ActorSystem, play.api.Mode, akka.stream.Materializer, lila.core.user.FlairGet):
 
   lazy val teamRepo    = TeamRepo(db(CollName("team")))
-  lazy val memberRepo  = MemberRepo(db(CollName("team_member")))
-  lazy val requestRepo = RequestRepo(db(CollName("team_request")))
+  lazy val memberRepo  = TeamMemberRepo(db(CollName("team_member")))
+  lazy val requestRepo = TeamRequestRepo(db(CollName("team_request")))
 
   lazy val forms = wire[TeamForm]
 
@@ -42,11 +36,15 @@ final class Env(
 
   private val teamSocket = wire[TeamSocket]
 
-  def version(teamId: TeamId) = teamSocket.rooms.ask[SocketVersion](teamId into RoomId)(GetVersion.apply)
+  def version(teamId: TeamId) = teamSocket.rooms.ask[SocketVersion](teamId.into(RoomId))(GetVersion.apply)
 
   private lazy val notifier = wire[Notifier]
 
-  val getTeamName = GetTeamNameSync(cached.blockingTeamName)
+  export cached.{ lightApi as lightTeamApi }
+
+  export cached.{ async as lightTeam, sync as lightTeamSync }
+
+  lazy val security = wire[TeamSecurity]
 
   lazy val api = wire[TeamApi]
 
@@ -54,22 +52,25 @@ final class Env(
     def process =
       case "team" :: "members" :: "add" :: teamId :: members :: Nil =>
         for
-          team <- teamRepo byId TeamId(teamId) orFail s"Team $teamId not found"
-          userIds = members.split(',').flatMap(UserStr.read).map(_.id)
+          team <- teamRepo.byId(TeamId(teamId)).orFail(s"Team $teamId not found")
+          userIds = members.split(',').flatMap(UserStr.read).map(_.id).toList
           _ <- api.addMembers(team, userIds)
         yield s"Added ${userIds.size} members to team ${team.name}"
 
   lila.common.Bus.subscribeFuns(
-    "shadowban" -> { case lila.hub.actorApi.mod.Shadowban(userId, true) =>
+    "shadowban" -> { case lila.core.mod.Shadowban(userId, true) =>
       api.deleteRequestsByUserId(userId)
     },
-    "teamIsLeader" -> { case lila.hub.actorApi.team.IsLeader(teamId, userId, promise) =>
-      promise completeWith cached.isLeader(teamId, userId)
+    "teamIsLeader" -> {
+      case lila.core.team.IsLeader(teamId, userId, promise) =>
+        promise.completeWith(api.isLeader(teamId, userId))
+      case lila.core.team.IsLeaderWithCommPerm(teamId, userId, promise) =>
+        promise.completeWith(api.hasPerm(teamId, userId, _.Comm))
     },
-    "teamJoinedBy" -> { case lila.hub.actorApi.team.TeamIdsJoinedBy(userId, promise) =>
-      promise completeWith cached.teamIdsList(userId)
+    "teamJoinedBy" -> { case lila.core.team.TeamIdsJoinedBy(userId, promise) =>
+      promise.completeWith(cached.teamIdsList(userId))
     },
-    "teamIsLeaderOf" -> { case lila.hub.actorApi.team.IsLeaderOf(leaderId, memberId, promise) =>
-      promise completeWith api.isLeaderOf(leaderId, memberId)
+    "teamIsLeaderOf" -> { case lila.core.team.IsLeaderOf(leaderId, memberId, promise) =>
+      promise.completeWith(api.isLeaderOf(leaderId, memberId))
     }
   )

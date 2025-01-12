@@ -1,6 +1,17 @@
-import { throttlePromiseDelay } from 'common/throttle';
-import * as xhr from 'common/xhr';
-import { Chart, Dimension, Env, Metric, Question, UI, EnvUser, Vm, Filters, ViewTab } from './interfaces';
+import { throttlePromiseDelay } from 'common/timing';
+import { json as xhrJson } from 'common/xhr';
+import type {
+  InsightData,
+  Dimension,
+  Env,
+  Metric,
+  Question,
+  UI,
+  EnvUser,
+  Vm,
+  Filters,
+  ViewTab,
+} from './interfaces';
 import { isLandscapeLayout } from './view';
 
 export default class {
@@ -77,18 +88,17 @@ export default class {
       return new Promise<void>(resolve => {
         setTimeout(
           () =>
-            xhr
-              .json(this.env.postUrl, {
-                method: 'post',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  metric: this.vm.metric.key,
-                  dimension: this.vm.dimension.key,
-                  filters: this.vm.filters,
-                }),
-              })
+            xhrJson(this.env.postUrl, {
+              method: 'post',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                metric: this.vm.metric.key,
+                dimension: this.vm.dimension.key,
+                filters: this.vm.filters,
+              }),
+            })
               .then(
-                (answer: Chart) => {
+                (answer: InsightData) => {
                   this.vm.answer = answer;
                   this.vm.loading = false;
                   if (this.isUserAction) this.vm.view = 'insights';
@@ -150,7 +160,7 @@ export default class {
   }
 
   setFilter(dimensionKey: string, valueKeys: string[]) {
-    if (dimensionKey == 'period' && valueKeys[0] == '3650') valueKeys = []; // 10 years
+    if (dimensionKey === 'period' && valueKeys[0] === '3650') valueKeys = []; // 10 years
     if (!valueKeys.length) delete this.vm.filters[dimensionKey];
     else this.vm.filters[dimensionKey] = valueKeys;
     this.askQuestion();
@@ -177,5 +187,4 @@ export default class {
       this.askQuestion();
     }
   }
-  // this.trans = lichess.trans(env.i18n);
 }

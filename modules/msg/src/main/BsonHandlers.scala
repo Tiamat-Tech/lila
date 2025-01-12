@@ -1,10 +1,10 @@
 package lila.msg
 
 import reactivemongo.api.bson.*
-import ornicar.scalalib.ThreadLocalRandom
+import scalalib.ThreadLocalRandom
 
-import lila.db.dsl.{ *, given }
 import lila.db.BSON
+import lila.db.dsl.{ *, given }
 
 private object BsonHandlers:
 
@@ -23,7 +23,7 @@ private object BsonHandlers:
             maskFor = r.getO[UserId]("maskFor"),
             maskWith = r.getO[Last]("maskWith")
           )
-        case x => sys error s"Invalid MsgThread users: $x"
+        case x => sys.error(s"Invalid MsgThread users: $x")
     def writes(w: BSON.Writer, t: MsgThread) =
       $doc(
         "_id"      -> t.id,
@@ -44,4 +44,8 @@ private object BsonHandlers:
   def writeThread(thread: MsgThread, delBy: List[UserId]): Bdoc =
     threadHandler.writeTry(thread).get ++ $doc("del" -> delBy)
       ++ $doc("maskWith" -> $doc("date" -> thread.lastMsg.date))
-    // looks weird, but maybe.. it is the way
+  // looks weird, but maybe.. it is the way
+
+  def selectNotDeleted(using me: Me) =
+    if UserId.lichess.is(me) then $empty // using "del" is too expensive
+    else $doc("del".$ne(me.userId))

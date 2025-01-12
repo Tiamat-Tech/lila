@@ -1,5 +1,4 @@
-import { Config, PuzPrefs, Puzzle } from 'puz/interfaces';
-import { Api as CgApi } from 'chessground/api';
+import type { Config, PuzPrefs, Puzzle } from 'puz/interfaces';
 
 export type RaceStatus = 'pre' | 'racing' | 'post';
 
@@ -10,7 +9,6 @@ export type PlayerId = string;
 export interface RacerOpts {
   data: RacerData;
   pref: RacerPrefs;
-  i18n: I18nDict;
 }
 
 export interface RacerPrefs extends PuzPrefs {}
@@ -34,8 +32,9 @@ export interface Race {
 
 export interface Player {
   name: string;
-  userId?: string;
+  id?: string;
   title?: string;
+  flair?: Flair;
 }
 export interface PlayerWithScore extends Player {
   score: number;

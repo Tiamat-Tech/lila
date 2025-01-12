@@ -1,9 +1,9 @@
 package lila.swiss
 
-import lila.user.User
+import lila.core.chess.Rank
 
 opaque type SwissRoundNumber = Int
-object SwissRoundNumber extends OpaqueInt[SwissRoundNumber]
+object SwissRoundNumber extends RelaxedOpaqueInt[SwissRoundNumber]
 
 case class MyInfo(rank: Rank, gameId: Option[GameId], user: User, player: SwissPlayer):
   def page = (rank + 9).value / 10
@@ -20,6 +20,5 @@ case class GameRanks(whiteRank: Rank, blackRank: Rank)
 case class FeaturedSwisses(
     created: List[Swiss],
     started: List[Swiss]
-)
-
-case class SwissFinish(id: SwissId, ranking: Ranking)
+):
+  def teamIds: Set[TeamId] = (created ::: started).view.map(_.teamId).toSet

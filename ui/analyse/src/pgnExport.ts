@@ -1,7 +1,9 @@
-import AnalyseCtrl from './ctrl';
+import type AnalyseCtrl from './ctrl';
 import { h } from 'snabbdom';
-import { initialFen, fixCrazySan } from 'chess';
-import { MaybeVNodes } from 'common/snabbdom';
+import { fixCrazySan, plyToTurn } from 'chess';
+import { type MaybeVNodes } from 'common/snabbdom';
+import { INITIAL_FEN } from 'chessops/fen';
+import { Game } from './interfaces';
 
 interface PgnNode {
   ply: Ply;
@@ -33,22 +35,18 @@ function renderNodesTxt(node: Tree.Node, forcePly: boolean): string {
   return s;
 }
 
+function renderPgnTags(game: Game): string {
+  let txt = '';
+  const tags: Array<[string, string]> = [];
+  if (game.variant.key !== 'standard') tags.push(['Variant', game.variant.name]);
+  if (game.initialFen && game.initialFen !== INITIAL_FEN) tags.push(['FEN', game.initialFen]);
+  if (tags.length) txt = tags.map(t => '[' + t[0] + ' "' + t[1] + '"]').join('\n') + '\n\n';
+  return txt;
+}
+
 export function renderFullTxt(ctrl: AnalyseCtrl): string {
   const g = ctrl.data.game;
-  let txt = renderNodesTxt(ctrl.tree.root, true);
-  const tags: Array<[string, string]> = [];
-  if (g.variant.key !== 'standard') tags.push(['Variant', g.variant.name]);
-  if (g.initialFen && g.initialFen !== initialFen) tags.push(['FEN', g.initialFen]);
-  if (tags.length)
-    txt =
-      tags
-        .map(function (t) {
-          return '[' + t[0] + ' "' + t[1] + '"]';
-        })
-        .join('\n') +
-      '\n\n' +
-      txt;
-  return txt;
+  return renderPgnTags(g) + renderNodesTxt(ctrl.tree.root, true);
 }
 
 export function renderNodesHtml(nodes: PgnNode[]): MaybeVNodes {
@@ -63,4 +61,27 @@ export function renderNodesHtml(nodes: PgnNode[]): MaybeVNodes {
     tags.push(h('san', fixCrazySan(node.san!)));
   });
   return tags;
+}
+
+export function renderVariationPgn(game: Game, nodeList: Tree.Node[]): string {
+  const filteredNodeList = nodeList.filter(node => node.san);
+  if (filteredNodeList.length === 0) {
+    return '';
+  }
+
+  let variationPgn = '';
+
+  const first = filteredNodeList[0];
+  variationPgn += `${plyPrefix(first)}${first.san} `;
+
+  for (let i = 1; i < filteredNodeList.length; i++) {
+    const node = filteredNodeList[i];
+    if (node.ply % 2 === 1) {
+      variationPgn += plyToTurn(node.ply) + '. ';
+    }
+
+    variationPgn += fixCrazySan(node.san!) + ' ';
+  }
+
+  return renderPgnTags(game) + variationPgn;
 }

@@ -1,10 +1,9 @@
 package lila.coordinate
 
+import chess.{ ByColor, Color }
 import reactivemongo.api.bson.*
 
-import lila.db.dsl.{ given, * }
-import chess.{ Color, ByColor }
-import lila.user.Me
+import lila.db.dsl.{ *, given }
 
 final class CoordinateApi(scoreColl: Coll)(using Executor):
 
@@ -13,13 +12,13 @@ final class CoordinateApi(scoreColl: Coll)(using Executor):
   def getScore(userId: UserId): Fu[Score] =
     scoreColl.byId[Score](userId).dmap(_ | Score(userId))
 
-  def addScore(mode: CoordMode, color: Color, hits: Int)(using me: Me.Id): Funit =
+  def addScore(mode: CoordMode, color: Color, hits: Int)(using me: MyId): Funit =
     scoreColl.update
       .one(
         $id(me),
         $push(
           $doc(
-            s"${color.name}${(mode == CoordMode.nameSquare) so "NameSquare"}" -> $doc(
+            s"${color.name}${(mode == CoordMode.nameSquare).so("NameSquare")}" -> $doc(
               "$each"  -> $arr(hits),
               "$slice" -> -20
             )
@@ -33,7 +32,7 @@ final class CoordinateApi(scoreColl: Coll)(using Executor):
     scoreColl
       .aggregateList(maxDocs = Int.MaxValue, _.sec): framework =>
         import framework.*
-        Match($doc("_id" $in userIds)) -> List(
+        Match($doc("_id".$in(userIds))) -> List(
           Project(
             $doc(
               "white" -> $doc("$max" -> "$white"),
@@ -43,7 +42,7 @@ final class CoordinateApi(scoreColl: Coll)(using Executor):
         )
       .map:
         _.flatMap: doc =>
-          doc.getAsOpt[UserId]("_id") map {
+          doc.getAsOpt[UserId]("_id").map {
             _ -> ByColor(~doc.int("white"), ~doc.int("black"))
           }
         .toMap

@@ -7,8 +7,8 @@
   <string name="becomePatron">Lichess संरक्षक बनें</string>
   <string name="xBecamePatron">%s Lichess Patron बन गया</string>
   <plurals name="xIsPatronForNbMonths">
-    <item quantity="one">लिचेस संरक्षक %1$s महीनों के लिए%2$s</item>
-    <item quantity="other">लिचेस संरक्षक %1$s महीनों के लिए%2$s</item>
+    <item quantity="one">%1$s %2$s महीने के लिए Lichess संरक्षक है</item>
+    <item quantity="other">%1$s %2$s महीनों के लिए Lichess संरक्षक हैं</item>
   </plurals>
   <string name="newPatrons">नए संरक्षक</string>
   <string name="freeChess">मुफ्त शतरंज सभी के लिए, हमेशा के लिए!</string>
@@ -80,4 +80,5 @@
   <string name="nowOneMonth">अब आप एक महीने के लिए Lichess संरक्षक हैं!</string>
   <string name="downgradeNextMonth">एक महीने बाद, आपसे फिर से शुल्क नहीं लिया जाएगा, और आपका लाइचेस खाता सामान्य खाते में डाउनग्रेड हो जाएगा।</string>
   <string name="changeCurrency">मुद्रा बदलें</string>
+  <string name="paymentDetails">भुगतान विवरण</string>
 </resources>

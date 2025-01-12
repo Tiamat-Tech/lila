@@ -8,19 +8,19 @@ import lila.common.Form.{
   cleanNonEmptyText,
   cleanText,
   cleanTextWithSymbols,
+  into,
   mustNotContainLichess,
   numberIn,
-  into,
   given
 }
+import lila.core.captcha.CaptchaApi
+import lila.core.team.Access
+import lila.core.user.FlairApi
 import lila.db.dsl.{ *, given }
 
-final private[team] class TeamForm(
-    teamRepo: TeamRepo,
-    lightUserApi: lila.user.LightUserApi,
-    val captcher: lila.hub.actors.Captcher
-)(using Executor)
-    extends lila.hub.CaptchedForm:
+final private[team] class TeamForm(teamRepo: TeamRepo, captcha: CaptchaApi, flairApi: FlairApi)(using
+    Executor
+):
 
   private object Fields:
     val name = "name" -> cleanText(minLength = 3, maxLength = 60).verifying(mustNotContainLichess(false))
@@ -38,14 +38,15 @@ final private[team] class TeamForm(
       "description" -> cleanText(minLength = 30, maxLength = 4000).into[Markdown]
     val descPrivate =
       "descPrivate" -> optional(cleanNonEmptyText(maxLength = 4000).into[Markdown])
-    val request     = "request"     -> boolean
-    val gameId      = "gameId"      -> of[GameId]
-    val move        = "move"        -> text
-    val chat        = "chat"        -> numberIn(Team.Access.allInTeam)
-    val forum       = "forum"       -> numberIn(Team.Access.all)
-    val hideMembers = "hideMembers" -> boolean
+    val request                            = "request"     -> boolean
+    val gameId                             = "gameId"      -> of[GameId]
+    val move                               = "move"        -> text
+    private def inAccess(cs: List[Access]) = numberIn(cs.map(_.id)).transform[Access](Access.byId, _.id)
+    val chat                               = "chat"        -> inAccess(Access.allInTeam)
+    val forum                              = "forum"       -> inAccess(Access.all)
+    val hideMembers                        = "hideMembers" -> boolean
 
-  val create = Form(
+  def create(using Me) = Form:
     mapping(
       Fields.name,
       Fields.password,
@@ -53,26 +54,27 @@ final private[team] class TeamForm(
       Fields.description,
       Fields.descPrivate,
       Fields.request,
+      "flair" -> flairApi.formField(),
       Fields.gameId,
       Fields.move
     )(TeamSetup.apply)(unapply)
       .verifying("team:teamAlreadyExists", d => !teamExists(d).await(2 seconds, "teamExists"))
-      .verifying(captchaFailMessage, validateCaptcha)
-  )
+      .verifying(lila.core.captcha.failMessage, captcha.validateSync)
 
-  def edit(team: Team) =
-    Form(
-      mapping(
-        Fields.password,
-        Fields.intro,
-        Fields.description,
-        Fields.descPrivate,
-        Fields.request,
-        Fields.chat,
-        Fields.forum,
-        Fields.hideMembers
-      )(TeamEdit.apply)(unapply)
-    ) fill TeamEdit(
+  def edit(team: Team)(using Me) = Form(
+    mapping(
+      Fields.password,
+      Fields.intro,
+      Fields.description,
+      Fields.descPrivate,
+      Fields.request,
+      Fields.chat,
+      Fields.forum,
+      Fields.hideMembers,
+      "flair" -> flairApi.formField()
+    )(TeamEdit.apply)(unapply)
+  ).fill(
+    TeamEdit(
       password = team.password,
       intro = team.intro,
       description = team.description,
@@ -80,59 +82,64 @@ final private[team] class TeamForm(
       request = !team.open,
       chat = team.chat,
       forum = team.forum,
-      hideMembers = team.hideMembers.has(true)
+      hideMembers = team.hideMembers.has(true),
+      flair = team.flair
     )
+  )
 
   def request(team: Team) = Form(
     mapping(
       Fields.requestMessage(team),
       Fields.passwordCheck(team)
     )(RequestSetup.apply)(unapply)
-  ) fill RequestSetup(
-    message = Request.defaultMessage.some,
-    password = None
+  ).fill(
+    RequestSetup(
+      message = TeamRequest.defaultMessage.some,
+      password = None
+    )
   )
 
-  def apiRequest(team: Team) = Form(
+  def apiRequest(team: Team) = Form:
     mapping(
       Fields.requestMessage(team),
       Fields.passwordCheck(team)
     )(RequestSetup.apply)(unapply)
-  )
 
-  val processRequest = Form(
+  val processRequest = Form:
     tuple(
       "process" -> nonEmptyText,
       "url"     -> nonEmptyText
     )
-  )
 
-  val selectMember = Form(
-    single(
-      "userId" -> lila.user.UserForm.historicalUsernameField
-    )
-  )
+  val selectMember = Form:
+    single:
+      "userId" -> lila.common.Form.username.historicalField
 
-  def createWithCaptcha = withCaptcha(create)
+  def createWithCaptcha(using Me) = create -> captcha.any
 
-  val pmAll = Form(
-    single("message" -> cleanTextWithSymbols.verifying(Constraints minLength 3, Constraints maxLength 9000))
-  )
+  val pmAll = Form:
+    single("message" -> cleanTextWithSymbols(minLength = 3, maxLength = 9000))
 
-  val explain = Form(single("explain" -> cleanText(minLength = 3, maxLength = 9000)))
+  val explain = Form:
+    single("explain" -> cleanText(minLength = 3, maxLength = 9000))
 
-  def leaders(t: Team) =
-    Form(single("leaders" -> nonEmptyText)) fill t.leaders
-      .flatMap(lightUserApi.sync)
-      .map(_.name)
-      .mkString(", ")
-
-  def members = Form(
+  def members = Form:
     single("members" -> nonEmptyText)
+
+  val blocklist = Form:
+    val sep = "\n"
+    single:
+      "names" -> cleanText(maxLength = 9000)
+        .transform[String](_.split(sep).take(300).toList.flatMap(UserStr.read).mkString(sep), identity)
+
+  val searchDeclinedForm: Form[Option[UserStr]] = Form(
+    single("search" -> optional(lila.common.Form.username.historicalField))
   )
+
+  val subscribe = Form(single("subscribe" -> optional(boolean)))
 
   private def teamExists(setup: TeamSetup) =
-    teamRepo.coll.exists($id(Team nameToId setup.name))
+    teamRepo.coll.exists($id(Team.nameToId(setup.name)))
 
 private[team] case class TeamSetup(
     name: String,
@@ -141,9 +148,10 @@ private[team] case class TeamSetup(
     description: Markdown,
     descPrivate: Option[Markdown],
     request: Boolean,
+    flair: Option[Flair],
     gameId: GameId,
     move: String
-):
+) extends lila.core.captcha.WithCaptcha:
   def isOpen = !request
 
 private[team] case class TeamEdit(
@@ -152,9 +160,10 @@ private[team] case class TeamEdit(
     description: Markdown,
     descPrivate: Option[Markdown],
     request: Boolean,
-    chat: Team.Access,
-    forum: Team.Access,
-    hideMembers: Boolean
+    chat: Access,
+    forum: Access,
+    hideMembers: Boolean,
+    flair: Option[Flair]
 ):
 
   def isOpen = !request

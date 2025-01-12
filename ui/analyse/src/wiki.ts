@@ -1,19 +1,42 @@
-import debounce from 'common/debounce';
+import { debounce } from 'common/timing';
+import { storedBooleanPropWithEffect } from 'common/storage';
+import { pubsub } from 'common/pubsub';
 
 export type WikiTheory = (nodes: Tree.Node[]) => void;
+
+export function wikiToggleBox() {
+  $('#wikibook-field').each(function (this: HTMLElement) {
+    const box = this;
+
+    const state = storedBooleanPropWithEffect('analyse.wikibooks.display', true, value =>
+      box.classList.toggle('toggle-box--toggle-off', value),
+    );
+
+    const toggle = () => state(!state());
+
+    if (!state()) box.classList.add('toggle-box--toggle-off');
+
+    $(box)
+      .children('legend')
+      .on('click', toggle)
+      .on('keypress', e => e.key === 'Enter' && toggle());
+  });
+}
 
 export default function wikiTheory(): WikiTheory {
   const cache = new Map<string, string>();
   const show = (html: string) => {
-    $('.analyse__wiki').html(html).toggleClass('empty', !html);
-    lichess.pubsub.emit('chat.resize');
+    $('.analyse__wiki').toggleClass('empty', !html);
+    $('.analyse__wiki-text').html(html);
+    pubsub.emit('chat.resize');
   };
 
   const plyPrefix = (node: Tree.Node) =>
     `${Math.floor((node.ply + 1) / 2)}${node.ply % 2 === 1 ? '._' : '...'}`;
 
   const wikiBooksUrl = 'https://en.wikibooks.org';
-  const apiArgs = 'redirects&origin=*&action=query&prop=extracts&formatversion=2&format=json&exchars=1200';
+  const apiArgs =
+    'redirects&origin=*&action=query&prop=extracts&formatversion=2&format=json&exchars=1200&stable=1';
 
   const removeEmptyParagraph = (html: string) => html.replace(/<p>(<br \/>|\s)*<\/p>/g, '');
 
@@ -56,7 +79,7 @@ export default function wikiTheory(): WikiTheory {
           if (res.ok) {
             const json = await res.json();
             const page = json.query.pages[0];
-            if (page.missing) saveAndShow('');
+            if (page.missing || page.extract.length == 0) saveAndShow('');
             else if (page.invalid) show('invalid request: ' + page.invalidreason);
             else if (!page.extract)
               show('error: unexpected API response:<br><pre>' + JSON.stringify(page) + '</pre>');
@@ -73,5 +96,5 @@ export default function wikiTheory(): WikiTheory {
 }
 
 export function wikiClear() {
-  $('.analyse__wiki').html('').toggleClass('empty', true);
+  $('.analyse__wiki').toggleClass('empty', true);
 }

@@ -21,8 +21,6 @@ export interface TournamentOpts {
   element: HTMLElement;
   socketSend: SocketSend;
   data: TournamentData;
-  i18n: I18nDict;
-  trans: Trans;
   classes: string | null;
   $side: Cash;
   $faq: Cash;
@@ -100,7 +98,7 @@ export interface TournamentData {
 
 export interface FeaturedGame {
   id: string;
-  fen: Fen;
+  fen: FEN;
   orientation: Color;
   lastMove: string;
   white: FeaturedPlayer;
@@ -121,6 +119,7 @@ export interface SimplePlayer {
   name: string;
   rating: number;
   title?: string;
+  flair?: string;
   provisional?: boolean;
 }
 
@@ -129,9 +128,13 @@ interface FeaturedPlayer extends SimplePlayer {
   berserk?: boolean;
 }
 
+type TeamName = string;
+type TeamFlair = string;
+export type LightTeam = [TeamName, TeamFlair?];
+
 export interface TeamBattle {
   teams: {
-    [id: string]: string;
+    [id: string]: LightTeam;
   };
   joinWith: string[];
   hasMoreThanTenTeams?: boolean;
@@ -174,6 +177,7 @@ export interface Pairing {
     rating: number;
     name: string;
     title?: string;
+    berserk?: boolean;
   };
   win: boolean;
   status: number;
@@ -218,8 +222,7 @@ export interface DuelTeams {
   [userId: string]: string;
 }
 
-export interface PodiumPlayer {
-  name: string;
+export interface PodiumPlayer extends LightUser {
   performance?: number;
   nb: Nb;
 }
@@ -238,4 +241,38 @@ export interface Pagination {
   currentPageResults: Page;
   nbResults: number;
   nbPages: number;
+}
+
+export interface Tournament {
+  id: string;
+  fullName: string;
+  bounds: {
+    start: Date;
+    end: Date;
+  };
+  schedule: {
+    freq: string;
+    speed: string;
+  };
+  perf: {
+    key: Exclude<Perf, 'fromPosition'>;
+    position: number;
+    name: string;
+  };
+  hasMaxRating: boolean;
+  variant: Variant;
+  startsAt: number;
+  finishesAt: number;
+  status: number;
+  position: number;
+  rated: boolean;
+  minutes: number;
+  createdBy: string;
+  clock: Clock;
+  nbPlayers: number;
+}
+
+export interface Clock {
+  limit: number;
+  increment: number;
 }

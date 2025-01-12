@@ -1,17 +1,15 @@
 package lila.tutor
 
+import chess.eval.WinPercent
+import lila.db.dsl.{ *, given }
 import lila.insight.*
-import lila.rating.PerfType
-import lila.common.config
-import lila.db.dsl.*
+import lila.insight.InsightEntry.BSONFields as F
 import lila.rating.BSONHandlers.perfTypeIdHandler
-import lila.insight.InsightEntry.{ BSONFields as F }
-import lila.insight.BSONHandlers.given
-import lila.analyse.WinPercent
+import lila.rating.PerfType
 
 object TutorResourcefulness:
 
-  val maxGames = config.Max(10_000)
+  val maxGames = Max(10_000)
 
   private[tutor] def compute(
       users: NonEmptyList[TutorUser]
@@ -24,9 +22,9 @@ object TutorResourcefulness:
     )
     val select = $doc(
       F.analysed -> true,
-      F.moves    -> $doc("$elemMatch" -> $doc("w" $lt WinPercent(33.3), "i" $lt -1))
+      F.moves    -> $doc("$elemMatch" -> $doc("w".$lt(WinPercent(33.3)), "i".$lt(-1)))
     )
-    val compute = TutorCustomInsight(users, question, "resourcefulness", _.resourcefulness) { docs =>
+    val compute = TutorCustomInsight(users, question, "resourcefulness", _.resourcefulness): docs =>
       for
         doc  <- docs
         perf <- doc.getAsOpt[PerfType]("_id")
@@ -34,8 +32,8 @@ object TutorResourcefulness:
         size <- doc.int("nb")
         percent = (size - loss) * 100d / size
       yield Cluster(perf, Insight.Single(Point(percent)), size, Nil)
-    }
-    insightApi.coll { coll =>
+
+    insightApi.coll: coll =>
       import coll.AggregationFramework.*
       val groupByPerf = GroupField(F.perf)(
         "loss" -> Sum(
@@ -45,7 +43,7 @@ object TutorResourcefulness:
       )
       compute(coll)(
         aggregateMine = mineSelect =>
-          Match(select ++ mineSelect ++ $doc(F.perf $in perfs)) -> List(
+          Match(select ++ mineSelect ++ $doc(F.perf.$in(perfs))) -> List(
             Sort(Descending(F.date)),
             Limit(maxGames.value),
             groupByPerf
@@ -56,4 +54,3 @@ object TutorResourcefulness:
             groupByPerf
           )
       )
-    }

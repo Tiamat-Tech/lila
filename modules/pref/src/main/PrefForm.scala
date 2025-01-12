@@ -3,8 +3,7 @@ package lila.pref
 import play.api.data.*
 import play.api.data.Forms.*
 
-import lila.common.Form.{ numberIn, stringIn }
-import lila.common.Form.tolerantBoolean
+import lila.common.Form.{ numberIn, stringIn, tolerantBoolean }
 
 object PrefForm:
 
@@ -27,14 +26,16 @@ object PrefForm:
     number.verifying(Pref.BooleanPref.verify)
 
   object fields:
-    val theme      = "theme"      -> text.verifying(Theme contains _)
-    val theme3d    = "theme3d"    -> text.verifying(Theme3d contains _)
-    val pieceSet   = "pieceSet"   -> text.verifying(PieceSet contains _)
-    val pieceSet3d = "pieceSet3d" -> text.verifying(PieceSet3d contains _)
-    val soundSet   = "soundSet"   -> text.verifying(SoundSet contains _)
+    val theme      = "theme"      -> text.verifying(Theme.contains(_))
+    val theme3d    = "theme3d"    -> text.verifying(Theme3d.contains(_))
+    val pieceSet   = "pieceSet"   -> text.verifying(PieceSet.contains(_))
+    val pieceSet3d = "pieceSet3d" -> text.verifying(PieceSet3d.contains(_))
+    val soundSet   = "soundSet"   -> text.verifying(SoundSet.contains(_))
     val bg         = "bg"         -> stringIn(Pref.Bg.fromString.keySet)
-    val bgImg = "bgImg" -> text(maxLength = 400).verifying: url =>
-      url.isBlank || url.startsWith("https://") || url.startsWith("//")
+    val bgImg = "bgImg" -> text(maxLength = 400).verifying(
+      "URL must use https",
+      url => url.isBlank || url.startsWith("https://") || url.startsWith("//")
+    )
     val is3d          = "is3d"          -> tolerantBoolean
     val zen           = "zen"           -> checkedNumber(Pref.Zen.choices)
     val voice         = "voice"         -> booleanNumber
@@ -45,6 +46,17 @@ object PrefForm:
     val autoThreefold = "autoThreefold" -> checkedNumber(Pref.AutoThreefold.choices)
     val submitMove    = "submitMove"    -> bitCheckedNumber(Pref.SubmitMove.choices)
     val confirmResign = "confirmResign" -> checkedNumber(Pref.ConfirmResign.choices)
+    val moretime      = "moretime"      -> checkedNumber(Pref.Moretime.choices)
+    val clockSound    = "clockSound"    -> booleanNumber
+    val pieceNotation = "pieceNotation" -> booleanNumber
+    val ratings       = "ratings"       -> checkedNumber(Pref.Ratings.choices)
+    val flairs        = "flairs"        -> boolean
+    val follow        = "follow"        -> booleanNumber
+    val challenge     = "challenge"     -> checkedNumber(Pref.Challenge.choices)
+    object board:
+      val brightness = "boardBrightness" -> number(0, 150)
+      val opacity    = "boardOpacity"    -> number(0, 100)
+      val hue        = "boardHue"        -> number(0, 100)
 
   def pref(lichobile: Boolean) = Form(
     mapping(
@@ -57,8 +69,7 @@ object PrefForm:
         "replay"        -> checkedNumber(Pref.Replay.choices),
         "pieceNotation" -> optional(booleanNumber),
         fields.zen.map2(optional),
-        "resizeHandle" -> optional(checkedNumber(Pref.ResizeHandle.choices)),
-        "blindfold"    -> checkedNumber(Pref.Blindfold.choices)
+        "resizeHandle" -> optional(checkedNumber(Pref.ResizeHandle.choices))
       )(DisplayData.apply)(unapply),
       "behavior" -> mapping(
         "moveEvent" -> optional(numberIn(Set(0, 1, 2))),
@@ -77,17 +88,18 @@ object PrefForm:
         "rookCastle" -> optional(booleanNumber)
       )(BehaviorData.apply)(unapply),
       "clock" -> mapping(
-        "tenths"   -> checkedNumber(Pref.ClockTenths.choices),
-        "bar"      -> booleanNumber,
-        "sound"    -> booleanNumber,
-        "moretime" -> checkedNumber(Pref.Moretime.choices)
+        "tenths" -> checkedNumber(Pref.ClockTenths.choices),
+        "bar"    -> booleanNumber,
+        "sound"  -> booleanNumber,
+        fields.moretime
       )(ClockData.apply)(unapply),
-      "follow"       -> booleanNumber,
-      "challenge"    -> checkedNumber(Pref.Challenge.choices),
+      fields.follow,
+      fields.challenge,
       "message"      -> checkedNumber(Pref.Message.choices),
       "studyInvite"  -> optional(checkedNumber(Pref.StudyInvite.choices)),
       "insightShare" -> numberIn(Set(0, 1, 2)),
-      "ratings"      -> optional(booleanNumber)
+      fields.ratings.map2(optional),
+      fields.flairs.map2(optional)
     )(PrefData.apply)(unapply)
   )
 
@@ -100,8 +112,7 @@ object PrefForm:
       replay: Int,
       pieceNotation: Option[Int],
       zen: Option[Int],
-      resizeHandle: Option[Int],
-      blindfold: Int
+      resizeHandle: Option[Int]
   )
 
   case class BehaviorData(
@@ -133,7 +144,8 @@ object PrefForm:
       message: Int,
       studyInvite: Option[Int],
       insightShare: Int,
-      ratings: Option[Int]
+      ratings: Option[Int],
+      flairs: Option[Boolean]
   ):
 
     def apply(pref: Pref) =
@@ -150,7 +162,6 @@ object PrefForm:
         destination = display.destination == 1,
         coords = display.coords,
         replay = display.replay,
-        blindfold = display.blindfold,
         challenge = challenge,
         message = message,
         studyInvite = studyInvite | Pref.default.studyInvite,
@@ -164,6 +175,7 @@ object PrefForm:
         voice = if pref.voice.isEmpty && !behavior.voice.contains(1) then None else behavior.voice,
         zen = display.zen | pref.zen,
         ratings = ratings | pref.ratings,
+        flairs = flairs | pref.flairs,
         resizeHandle = display.resizeHandle | pref.resizeHandle,
         rookCastle = behavior.rookCastle | pref.rookCastle,
         pieceNotation = display.pieceNotation | pref.pieceNotation,
@@ -180,7 +192,6 @@ object PrefForm:
           coords = pref.coords,
           replay = pref.replay,
           captured = if pref.captured then 1 else 0,
-          blindfold = pref.blindfold,
           zen = pref.zen.some,
           resizeHandle = pref.resizeHandle.some,
           pieceNotation = pref.pieceNotation.some
@@ -208,7 +219,8 @@ object PrefForm:
         message = pref.message,
         studyInvite = pref.studyInvite.some,
         insightShare = pref.insightShare,
-        ratings = pref.ratings.some
+        ratings = pref.ratings.some,
+        flairs = pref.flairs.some
       )
 
   def prefOf(p: Pref): Form[PrefData] = pref(lichobile = false).fill(PrefData(p))

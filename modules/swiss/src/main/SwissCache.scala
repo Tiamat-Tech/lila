@@ -12,11 +12,11 @@ final class SwissCache(
   import BsonHandlers.given
 
   object swissCache:
-    private val cache = cacheApi[SwissId, Option[Swiss]](512, "swiss.swiss"):
+    private val cache = cacheApi[SwissId, Option[Swiss]](64, "swiss.swiss"):
       _.expireAfterWrite(1 second)
         .buildAsyncFuture(id => mongo.swiss.byId[Swiss](id))
 
-    def clear(id: SwissId) = cache invalidate id
+    def clear(id: SwissId) = cache.invalidate(id)
     export cache.{ get as byId }
     def notFinishedById(id: SwissId) = byId(id).dmap(_.filter(_.isNotFinished))
     def createdById(id: SwissId)     = byId(id).dmap(_.filter(_.isCreated))
@@ -24,7 +24,7 @@ final class SwissCache(
 
   val name = cacheApi.sync[SwissId, Option[String]](
     name = "swiss.name",
-    initialCapacity = 4096,
+    initialCapacity = 8_192,
     compute = id => mongo.swiss.primitiveOne[String]($id(id), "name"),
     default = _ => none,
     strategy = Syncache.Strategy.WaitAfterUptime(20 millis),
@@ -41,14 +41,14 @@ final class SwissCache(
       val max = 5
       for
         enterable <- mongo.swiss.primitive[SwissId](
-          $doc("teamId" -> teamId, "finishedAt" $exists false),
-          $sort asc "startsAt",
+          $doc("teamId" -> teamId, "finishedAt".$exists(false)),
+          $sort.asc("startsAt"),
           nb = max,
           "_id"
         )
         finished <- mongo.swiss.primitive[SwissId](
-          $doc("teamId" -> teamId, "finishedAt" $exists true),
-          $sort desc "startsAt",
+          $doc("teamId" -> teamId, "finishedAt".$exists(true)),
+          $sort.desc("startsAt"),
           nb = max - enterable.size,
           "_id"
         )

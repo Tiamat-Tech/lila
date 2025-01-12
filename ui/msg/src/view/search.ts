@@ -1,18 +1,15 @@
-import { h, VNode } from 'snabbdom';
-import throttle from 'common/throttle';
-import MsgCtrl from '../ctrl';
-import { SearchResult, User } from '../interfaces';
-import renderContacts from './contact';
-import { userName, userIcon } from './util';
-import { hookMobileMousedown } from 'common/mobile';
+import { h, type VNode } from 'snabbdom';
+import { throttle } from 'common/timing';
+import type MsgCtrl from '../ctrl';
+import type { SearchResult, User } from '../interfaces';
+import renderContacts, { userIcon } from './contact';
+import { fullName } from 'common/userLink';
+import { hookMobileMousedown } from 'common/device';
 
-export function renderInput(ctrl: MsgCtrl): VNode {
-  return h('div.msg-app__side__search', [
+export const renderInput = (ctrl: MsgCtrl): VNode =>
+  h('div.msg-app__side__search', [
     h('input', {
-      attrs: {
-        value: '',
-        placeholder: ctrl.trans.noarg('searchOrStartNewDiscussion'),
-      },
+      attrs: { value: '', placeholder: i18n.site.searchOrStartNewDiscussion },
       hook: {
         insert(vnode) {
           const input = vnode.elm as HTMLInputElement;
@@ -30,13 +27,12 @@ export function renderInput(ctrl: MsgCtrl): VNode {
       },
     }),
   ]);
-}
 
 export function renderResults(ctrl: MsgCtrl, res: SearchResult): VNode {
   return h('div.msg-app__search.msg-app__side__content', [
     res.contacts[0] &&
       h('section', [
-        h('h2', ctrl.trans.noarg('discussions')),
+        h('h2', i18n.site.discussions),
         h(
           'div.msg-app__search__contacts',
           res.contacts.map(t => renderContacts(ctrl, t)),
@@ -44,7 +40,7 @@ export function renderResults(ctrl: MsgCtrl, res: SearchResult): VNode {
       ]),
     res.friends[0] &&
       h('section', [
-        h('h2', ctrl.trans.noarg('friends')),
+        h('h2', i18n.site.friends),
         h(
           'div.msg-app__search__users',
           res.friends.map(u => renderUser(ctrl, u)),
@@ -52,7 +48,7 @@ export function renderResults(ctrl: MsgCtrl, res: SearchResult): VNode {
       ]),
     res.users[0] &&
       h('section', [
-        h('h2', ctrl.trans.noarg('players')),
+        h('h2', i18n.site.players),
         h(
           'div.msg-app__search__users',
           res.users.map(u => renderUser(ctrl, u)),
@@ -64,14 +60,11 @@ export function renderResults(ctrl: MsgCtrl, res: SearchResult): VNode {
 function renderUser(ctrl: MsgCtrl, user: User): VNode {
   return h(
     'div.msg-app__side__contact',
-    {
-      key: user.id,
-      hook: hookMobileMousedown(_ => ctrl.openConvo(user.id)),
-    },
+    { key: user.id, hook: hookMobileMousedown(_ => ctrl.openConvo(user.id)) },
     [
       userIcon(user, 'msg-app__side__contact__icon'),
       h('div.msg-app__side__contact__user', [
-        h('div.msg-app__side__contact__head', [h('div.msg-app__side__contact__name', userName(user))]),
+        h('div.msg-app__side__contact__head', [h('div.msg-app__side__contact__name', fullName(user))]),
       ]),
     ],
   );

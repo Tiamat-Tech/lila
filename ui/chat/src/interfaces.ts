@@ -1,21 +1,20 @@
-import { VNode } from 'snabbdom';
-import { PresetCtrl } from './preset';
-import { Prop } from 'common';
+import type { VNode } from 'snabbdom';
+import type { Prop } from 'common';
 
 import type { Palantir } from 'palantir';
+import type { EnhanceOpts } from 'common/richText';
 
 export interface ChatOpts {
-  el: Element;
+  el: HTMLElement;
   data: ChatData;
   writeable: boolean;
   kobold: boolean;
   blind: boolean;
   timeout: boolean;
-  parseMoves: boolean;
+  enhance?: EnhanceOpts;
   public: boolean;
   permissions: Permissions;
   timeoutReasons?: ModerationReason[];
-  i18n: I18nDict;
   preset?: string;
   noteId?: string;
   noteText?: string;
@@ -40,8 +39,7 @@ export interface ChatData {
   loginRequired: boolean;
   restricted: boolean;
   palantir: boolean;
-  domVersion: number;
-  hostId?: string;
+  hostIds?: string[];
 }
 
 export interface Line {
@@ -51,6 +49,7 @@ export interface Line {
   c?: string; // color
   r?: boolean; // troll
   p?: boolean; // patron
+  f?: Flair;
   title?: string;
 }
 
@@ -63,24 +62,6 @@ export interface Permissions {
 
 export type Tab = string;
 
-export interface Ctrl {
-  data: ChatData;
-  opts: ChatOpts;
-  vm: ViewModel;
-  allTabs: Tab[];
-  preset: PresetCtrl;
-  note?: NoteCtrl;
-  moderation(): ModerationCtrl | undefined;
-  post(text: string): boolean;
-  trans: Trans;
-  setTab(tab: Tab): void;
-  setEnabled(v: boolean): void;
-  plugin?: ChatPlugin;
-  palantir: ChatPalantir;
-  redraw: Redraw;
-  destroy(): void;
-}
-
 export interface ChatPalantir {
   instance?: Palantir;
   loaded: boolean;
@@ -90,23 +71,21 @@ export interface ChatPalantir {
 export interface ViewModel {
   tab: Tab;
   enabled: boolean;
-  placeholderKey: string;
   loading: boolean;
   autofocus: boolean;
   timeout: boolean;
   writeable: boolean;
+  domVersion: number;
 }
 
 export interface NoteOpts {
   id: string;
   text?: string;
-  trans: Trans;
   redraw: Redraw;
 }
 
 export interface NoteCtrl {
   id: string;
-  trans: Trans;
   text(): string | undefined;
   fetch(): void;
   post(text: string): void;
@@ -128,9 +107,7 @@ export interface ModerationCtrl {
   timeout(reason: ModerationReason, text: string): void;
 }
 
-export interface ModerationData {
-  id: string;
-  username: string;
+export interface ModerationData extends LightUser {
   text: string;
   games?: number;
   tos?: boolean;

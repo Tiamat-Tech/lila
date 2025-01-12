@@ -1,9 +1,7 @@
 package lila.api
 
 import lila.common.Bus
-import lila.security.Granter
-import lila.user.Me
-import lila.user.{ User, Me }
+import lila.core.perm.Granter
 
 final class AccountClosure(
     userRepo: lila.user.UserRepo,
@@ -23,22 +21,24 @@ final class AccountClosure(
     modApi: lila.mod.ModApi,
     modLogApi: lila.mod.ModlogApi,
     appealApi: lila.appeal.AppealApi,
+    ublogApi: lila.ublog.UblogApi,
     activityWrite: lila.activity.ActivityWriteApi,
     email: lila.mailer.AutomaticEmail
 )(using Executor):
 
   Bus.subscribeFuns(
-    "garbageCollect" -> { case lila.hub.actorApi.security.GarbageCollect(userId) =>
+    "garbageCollect" -> { case lila.core.security.GarbageCollect(userId) =>
       (modApi.garbageCollect(userId) >> lichessClose(userId))
     },
-    "rageSitClose" -> { case lila.hub.actorApi.playban.RageSitClose(userId) => lichessClose(userId) }
+    "rageSitClose" -> { case lila.core.playban.RageSitClose(userId) => lichessClose(userId) }
   )
 
   def close(u: User)(using me: Me): Funit = for
-    playbanned <- playbanApi.hasCurrentBan(u)
-    selfClose = me is u
-    modClose  = !selfClose && Granter(_.CloseAccount)
-    badApple  = u.lameOrTrollOrAlt || modClose
+    playbanned <- playbanApi.hasCurrentPlayban(u.id)
+    selfClose    = me.is(u)
+    teacherClose = !selfClose && !Granter(_.CloseAccount) && Granter(_.Teacher)
+    modClose     = !selfClose && Granter(_.CloseAccount)
+    badApple     = u.lameOrTroll || u.marks.alt || modClose
     _       <- userRepo.disable(u, keepEmail = badApple || playbanned)
     _       <- relationApi.unfollowAll(u.id)
     _       <- rankingApi.remove(u.id)
@@ -46,7 +46,7 @@ final class AccountClosure(
     _       <- challengeApi.removeByUserId(u.id)
     _       <- tournamentApi.withdrawAll(u)
     _       <- swissApi.withdrawAll(u, teamIds)
-    _       <- planApi.cancel(u).recoverDefault
+    _       <- planApi.cancelIfAny(u).recoverDefault
     _       <- seekApi.removeByUser(u)
     _       <- securityStore.closeAllSessionsOf(u.id)
     _       <- pushEnv.webSubscriptionApi.unsubscribeByUser(u)
@@ -55,28 +55,28 @@ final class AccountClosure(
     reports <- reportApi.processAndGetBySuspect(lila.report.Suspect(u))
     _ <-
       if selfClose then modLogApi.selfCloseAccount(u.id, reports)
+      else if teacherClose then modLogApi.teacherCloseAccount(u.id)
       else modLogApi.closeAccount(u.id)
     _ <- appealApi.onAccountClose(u)
-    _ <- u.marks.troll so relationApi.fetchFollowing(u.id).flatMap {
-      activityWrite.unfollowAll(u, _)
-    }
-  yield Bus.publish(lila.hub.actorApi.security.CloseAccount(u.id), "accountClose")
+    _ <- ublogApi.onAccountClose(u)
+    _ <- u.marks.troll.so:
+      relationApi.fetchFollowing(u.id).flatMap(activityWrite.unfollowAll(u, _))
+  yield Bus.publish(lila.core.security.CloseAccount(u.id), "accountClose")
 
   private def lichessClose(userId: UserId) =
-    userRepo.lichessAnd(userId) flatMapz { (lichess, user) => close(user)(using Me(lichess)) }
+    userRepo.lichessAnd(userId).flatMapz { (lichess, user) => close(user)(using Me(lichess)) }
 
   def eraseClosed(username: UserId): Fu[Either[String, String]] =
-    userRepo byId username map {
+    userRepo.byId(username).map {
       case None => Left("No such user.")
       case Some(user) =>
-        userRepo setEraseAt user
-        email gdprErase user
-        lila.common.Bus.publish(lila.user.User.GDPRErase(user), "gdprErase")
+        userRepo.setEraseAt(user)
+        email.gdprErase(user)
         Right(s"Erasing all data about $username in 24h")
     }
 
   def closeThenErase(username: UserStr)(using Me): Fu[Either[String, String]] =
-    userRepo byId username flatMap {
+    userRepo.byId(username).flatMap {
       case None    => fuccess(Left("No such user."))
-      case Some(u) => (u.enabled.yes so close(u)) >> eraseClosed(u.id)
+      case Some(u) => (u.enabled.yes.so(close(u))) >> eraseClosed(u.id)
     }

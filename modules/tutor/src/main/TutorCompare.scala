@@ -1,16 +1,16 @@
 package lila.tutor
 
-import lila.common.Heapsort.topN
-import lila.insight.InsightDimension
+import scalalib.HeapSort.topN
+
+import lila.insight.{ InsightDimension, InsightPosition }
 
 case class TutorCompare[D, V](
     dimensionType: InsightDimension[D],
     metric: TutorMetric[V],
     points: List[(D, TutorBothValueOptions[V])],
-    color: Option[chess.Color] = None
+    color: Option[Color] = None
 )(using number: TutorNumber[V]):
   import TutorCompare.*
-  import TutorNumber.*
 
   val totalCountMine = points.map(_._2.mine.so(_.count)).sum
 
@@ -18,7 +18,7 @@ case class TutorCompare[D, V](
     val myPoints: List[(D, ValueCount[V])] =
       points.collect { case (dim, TutorBothValueOptions(Some(mine), _)) => dim -> mine }
     for
-      (dim1, met1) <- myPoints.filter(_._2 relevantTo totalCountMine)
+      (dim1, met1) <- myPoints.filter(_._2.relevantTo(totalCountMine))
       avg = number.mean(myPoints.filter(_._1 != dim1).map(_._2))
     yield Comparison(dimensionType, dim1, metric, met1, DimAvg(avg), color)
 
@@ -30,7 +30,7 @@ case class TutorCompare[D, V](
 
   def allComparisons: List[AnyComparison] = dimensionComparisons ::: peerComparisons
 
-  def as(color: chess.Color) = copy(color = color.some)
+  def as(color: Color) = copy(color = color.some)
 
 object TutorCompare:
 
@@ -40,18 +40,21 @@ object TutorCompare:
       metric: TutorMetric[V],
       value: ValueCount[V],
       reference: Reference[V],
-      color: Option[chess.Color] = None
+      color: Option[Color] = None
   )(using number: TutorNumber[V]):
 
     val grade = number.grade(value.value, reference.value.value)
 
-    val importance = grade.value * math.sqrt(value.count)
+    val importance = grade.value * math.sqrt:
+      value.count * metric.metric.position.match
+        case InsightPosition.Game => 35
+        case InsightPosition.Move => 1
 
-    def better                          = grade.better
-    def worse                           = grade.worse
+    export grade.{ better, worse }
     def similarTo(other: AnyComparison) = other.dimensionType == dimensionType && other.metric == metric
 
-    override def toString = s"(${grade.value}) $dimensionType $metric ${value.value} vs $reference"
+    override def toString =
+      s"(${grade.value}) $dimensionType $metric ${value.value} vs $reference (importance: $importance)"
 
   given compOrder: Ordering[AnyComparison] = Ordering.by(_.importance.abs)
 
@@ -59,19 +62,19 @@ object TutorCompare:
   type AnyCompare    = TutorCompare[?, ?]
 
   def mixedBag(comparisons: List[AnyComparison])(nb: Int): List[AnyComparison] = {
-    val half = ~lila.common.Maths.divideRoundUp(nb, 2)
+    val half = ~scalalib.Maths.divideRoundUp(nb, 2)
     comparisons.partition(_.better) match
       case (positives, negatives) => positives.topN(half) ::: negatives.topN(half)
-  } sorted compOrder.reverse take nb
+  }.sorted(compOrder.reverse).take(nb)
 
   def sortAndPreventRepetitions(comparisons: List[AnyComparison])(nb: Int): List[AnyComparison] =
     comparisons
       .sorted(compOrder.reverse)
       .foldLeft(Vector.empty[AnyComparison]) {
-        case (Vector(), c)                         => Vector(c)
-        case (acc, _) if acc.size >= nb            => acc
-        case (acc, c) if acc.exists(_ similarTo c) => acc
-        case (acc, c)                              => acc :+ c
+        case (Vector(), c)                          => Vector(c)
+        case (acc, _) if acc.size >= nb             => acc
+        case (acc, c) if acc.exists(_.similarTo(c)) => acc
+        case (acc, c)                               => acc :+ c
       }
       .toList
 

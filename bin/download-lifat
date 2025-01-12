@@ -1,22 +1,18 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
-commit=e06857a9303d05581e13e2c814b3019c4e5beae2
+commit=master
+origin=https://github.com/lichess-org/lifat
 
-lifat_dir="${LIFAT_DIR:-lifat}"
-mkdir -p "$lifat_dir"
-lifat_commit_dir=$(realpath "$lifat_dir")/lifat-$commit
-
-mkdir -p "$lifat_dir"
-
-if [ ! -d "$lifat_commit_dir" ]; then
-	git init "$lifat_commit_dir"
-	pushd "$lifat_commit_dir"
-	git remote add origin https://github.com/lichess-org/lifat
-	git fetch --depth 1 --no-write-fetch-head origin "$commit"
-	git checkout --detach "$commit"
-	popd
+deploy_dir="${LIFAT_DIR:-lifat}"
+mkdir -p "$deploy_dir"
+cd "$deploy_dir"
+if [ ! -d "$deploy_dir/.git" ]; then
+	git init
+	git remote add origin $origin
+	git fetch origin
 fi
 
-ln -sfn "$lifat_commit_dir" "public/lifat"
+echo "Checking out lifat commit: $commit"
+git checkout "$commit"
 
-(cd "$lifat_commit_dir" && git log --oneline)
+git log -n 1 --pretty=oneline

@@ -3,12 +3,12 @@
 #miniBoard {
   @extend %box-radius-force, %popup-shadow;
 
-  width: 20rem;
+  width: 21rem;
   min-height: 3em;
   background: $c-bg-popup;
   display: none;
   position: absolute;
-  z-index: z('powertip');
+  z-index: $z-powertip-120;
 
   .mini-game__player {
     @include padding-direction(3px, 0.5em, 0.3em, 0.7em);
@@ -25,41 +25,35 @@
 
     height: 83px;
     body.no-rating & {
-      height: 30px;
+      height: unset;
     }
     padding: 0.4em 0.5em 0.3em 0.5em;
     border-bottom: $border;
     overflow: hidden;
 
     &__top {
-      @extend %flex-between;
-
-      .left {
-        @extend %flex-center-nowrap;
-      }
-
-      &__country {
-        margin-#{$start-direction}: 0.5em;
-      }
+      @extend %flex-between-nowrap, %ellipsis;
+      gap: 0.6ch;
 
       .user-link {
-        @extend %ellipsis;
-
+        flex: 0 0 auto;
         display: block;
-
+        font-size: 1.1em;
         .line {
           vertical-align: middle;
         }
       }
-
-      &__country {
+      &__flag {
         @extend %flex-center;
-
+        margin-inline-start: 0.5ch;
+        gap: 0.5ch;
+        flex: 1 1 auto;
+        overflow: hidden;
         font-size: 0.9em;
-
-        img {
-          margin-#{$end-direction}: 0.3em;
-        }
+        color: $c-font-dim;
+      }
+      signal {
+        flex: 0 0 auto;
       }
     }
 
@@ -73,6 +67,9 @@
         max-width: 25%;
         padding: 2px 3px;
         text-align: left;
+      }
+      body.no-rating & {
+        display: none;
       }
     }
 
@@ -109,9 +106,8 @@
     }
   }
 
-  &__mod {
+  &__details {
     @extend %flex-between;
-
     white-space: nowrap;
 
     &__marks {
@@ -122,7 +118,6 @@
 
     span {
       padding: 0.3em 0.5em 0.3em 0.5em;
-      margin: 0;
     }
   }
 }

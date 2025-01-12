@@ -3,11 +3,11 @@ package lila.team
 import play.api.libs.json.*
 
 import lila.common.Json.given
-import lila.user.LightUserApi
+import lila.core.user.LightUserApi
 
-final class JsonView(lightUserApi: LightUserApi, userJson: lila.user.JsonView):
+final class JsonView(lightUserApi: LightUserApi, userJson: lila.core.user.JsonView):
 
-  given teamWrites: OWrites[Team] = OWrites { team =>
+  given teamWrites: OWrites[Team] = OWrites: team =>
     Json
       .obj(
         "id"          -> team.id,
@@ -15,12 +15,17 @@ final class JsonView(lightUserApi: LightUserApi, userJson: lila.user.JsonView):
         "description" -> team.description,
         "open"        -> team.open,
         "leader"      -> lightUserApi.sync(team.createdBy), // for BC
-        "leaders"     -> team.leaders.flatMap(lightUserApi.sync),
         "nbMembers"   -> team.nbMembers
       )
-  }
+      .add("flair" -> team.flair)
 
-  given OWrites[Request] = OWrites { req =>
+  given memberWithPermsWrites: OWrites[TeamMember] = OWrites: m =>
+    Json.obj("user" -> lightUserApi.syncFallback(m.user), "perms" -> m.perms.map(_.key))
+
+  given teamWithLeadersWrites: OWrites[Team.WithPublicLeaderIds] = OWrites: t =>
+    teamWrites.writes(t.team) ++ Json.obj("leaders" -> t.publicLeaders.map(lightUserApi.syncFallback))
+
+  given OWrites[TeamRequest] = OWrites: req =>
     Json
       .obj(
         "userId"  -> req.user,
@@ -29,7 +34,6 @@ final class JsonView(lightUserApi: LightUserApi, userJson: lila.user.JsonView):
         "date"    -> req.date
       )
       .add("declined" -> req.declined)
-  }
 
   given requestWithUserWrites: OWrites[RequestWithUser] = OWrites:
     case RequestWithUser(req, user) =>

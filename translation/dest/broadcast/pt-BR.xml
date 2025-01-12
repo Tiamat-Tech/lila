@@ -1,30 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="broadcasts">Transmissões</string>
+  <string name="myBroadcasts">Minhas transmissões</string>
   <plurals name="nbBroadcasts">
     <item quantity="one">%s transmissão</item>
     <item quantity="other">%s transmissões</item>
   </plurals>
   <string name="liveBroadcasts">Transmissões ao vivo do torneio</string>
+  <string name="broadcastCalendar">Calendário das transmissões</string>
   <string name="newBroadcast">Nova transmissão ao vivo</string>
+  <string name="subscribedBroadcasts">Transmissões em que você se inscreveu</string>
+  <string name="aboutBroadcasts">Sobre as transmissões</string>
+  <string name="howToUseLichessBroadcasts">Como usar as transmissões do Lichess.</string>
+  <string name="theNewRoundHelp">A nova rodada terá os mesmos membros e colaboradores que a anterior.</string>
   <string name="addRound">Adicionar uma rodada</string>
   <string name="ongoing">Em andamento</string>
   <string name="upcoming">Próximos</string>
   <string name="completed">Concluído</string>
+  <string name="completedHelp">O Lichess detecta o fim da rodada baseado nos jogos fonte. Use essa opção se não houver fonte.</string>
   <string name="roundName">Nome da rodada</string>
   <string name="roundNumber">Número da rodada</string>
   <string name="tournamentName">Nome do torneio</string>
   <string name="tournamentDescription">Descrição curta do torneio</string>
   <string name="fullDescription">Descrição completa do evento</string>
   <string name="fullDescriptionHelp">Descrição longa e opcional da transmissão. %1$s está disponível. O tamanho deve ser menor que %2$s caracteres.</string>
-  <string name="sourceUrlOrGameIds">URL de origem ou IDs das partidas</string>
+  <string name="sourceSingleUrl" comment="An input box. The user can add the external URL the PGN playback of the game is coming from, to set up their event broadcast.&#10;&#10;Could be alternatively stated as &quot;Source URL for the PGN&quot;.">URL de origem de PGN</string>
   <string name="sourceUrlHelp">URL que Lichess irá verificar para obter atualizações PGN. Deve ser acessível ao público a partir da Internet.</string>
-  <string name="gameIdsHelp">Como alternativa, você pode inserir até 64 IDs de jogo do Lichess, separados por espaços.</string>
-  <string name="startDate">Data de início em seu próprio fuso horário</string>
+  <string name="sourceGameIds">Até 64 IDs de partidas do Lichess, separados por espaços.</string>
+  <string name="startDateTimeZone">Data de início no horário local do torneio: %s</string>
   <string name="startDateHelp">Opcional, se você sabe quando o evento começa</string>
-  <string name="credits">Crédito a fonte</string>
-  <string name="broadcastUrl">URL da transmissão</string>
-  <string name="currentRoundUrl">URL da rodada atual</string>
   <string name="currentGameUrl">URL da partida atual</string>
   <string name="downloadAllRounds">Baixar todas as rodadas</string>
   <string name="resetRound">Reiniciar esta rodada</string>
@@ -33,5 +37,47 @@
   <string name="deleteAllGamesOfThisRound">Deletar todas as partidas desta rodada. A fonte deverá estar ativa para criá-las novamente.</string>
   <string name="editRoundStudy">Editar estudo da rodada</string>
   <string name="deleteTournament">Excluir este torneio</string>
-  <string name="definitivelyDeleteTournament" comment="definitivelyDeleteTournament&#10;&#10;Confirmation prompt, when attempting to delete a broadcast on https://lichess.org/broadcast">Excluir permanentemente todo o torneio, incluindo todas as rodadas e jogos.</string>
+  <string name="definitivelyDeleteTournament">Excluir permanentemente todo o torneio, incluindo todas as rodadas e jogos.</string>
+  <string name="showScores" comment="An option for creating a broadcast (https://lichess.org/broadcast). This is optional, as scoring will be calculated automatically by Lichess, and some organisations prefer to do this manually or not show scores until the end - depending on how the tournament works.">Mostrar pontuações dos jogadores com base nos resultados das partidas</string>
+  <string name="replacePlayerTags">Opcional: substituir nomes de jogador, ratings e títulos</string>
+  <string name="fideFederations">Federações FIDE</string>
+  <string name="top10Rating">Classificação top 10</string>
+  <string name="fidePlayers">Jogadores FIDE</string>
+  <string name="fidePlayerNotFound">Jogador não encontrando na FIDE</string>
+  <string name="fideProfile">Perfil FIDE</string>
+  <string name="federation">Federação</string>
+  <string name="ageThisYear">Idade atual</string>
+  <string name="unrated" comment="Please do not translate simply as &quot;casual&quot;. &quot;Unrated&quot; here refers to tournaments that are organised outside of Lichess. The rating in question will usually align to a FIDE federation.">Sem rating</string>
+  <string name="recentTournaments">Torneios recentes</string>
+  <string name="openLichess" comment="Appears as a link when a Lichess broadcast is embedded in an external website. Clicking it will take the user to the Lichess website, to view it in full.&#10;&#10;For an example of what an embedded broadcast looks like, see https://lichess.org/developers under the section 'Embed a broadcast in your site'.">Abrir no Lichess</string>
+  <string name="teams">Equipes</string>
+  <string name="boards">Tabuleiros</string>
+  <string name="overview">Visão geral</string>
+  <string name="subscribeTitle">Inscreva-se para ser notificado no início de cada rodada. Você pode configurar as notificações de transmissões nas suas preferências.</string>
+  <string name="uploadImage">Enviar imagem de torneio</string>
+  <string name="noBoardsYet">Sem tabuleiros ainda. Eles vão aparecer quando os jogos forem enviados.</string>
+  <string name="boardsCanBeLoaded" comment="%s is 'Broadcaster App'">Tabuleiros são carregados com uma fonte ou pelo %s</string>
+  <string name="startsAfter">Começa após %s</string>
+  <string name="startVerySoon">A transmissão começará em breve.</string>
+  <string name="notYetStarted">A transmissão ainda não começou.</string>
+  <string name="officialWebsite">Site oficial</string>
+  <string name="standings">Classificação</string>
+  <string name="officialStandings">Classificação oficial</string>
+  <string name="iframeHelp" comment="%s is 'webmasters page'">Mais opções na %s</string>
+  <string name="webmastersPage">página dos webmasters</string>
+  <string name="pgnSourceHelp" comment="%s is 'streaming API'">Uma fonte PGN pública ao vivo desta rodada. Há também a %s para uma sincronização mais rápida e eficiente.</string>
+  <string name="embedThisBroadcast">Incorporar essa transmissão em seu site</string>
+  <string name="embedThisRound">Incorporar %s em seu site</string>
+  <string name="ratingDiff">Diferência de pontos</string>
+  <string name="gamesThisTournament">Jogos neste torneio</string>
+  <string name="score">Pontuação</string>
+  <string name="allTeams">Todas as equipes</string>
+  <string name="tournamentFormat">Formato do torneio</string>
+  <string name="tournamentLocation">Local do torneio</string>
+  <string name="topPlayers">Melhores jogadores</string>
+  <string name="timezone">Fuso horário</string>
+  <string name="fideRatingCategory">Categoria de rating FIDE</string>
+  <string name="optionalDetails">Detalhes opcionais</string>
+  <string name="pastBroadcasts">Transmissões passadas</string>
+  <string name="allBroadcastsByMonth">Ver todas as transmissões por mês</string>
 </resources>

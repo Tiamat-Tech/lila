@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="swiss">Swiss</string>
   <string name="swissTournaments">Swiss tournaments</string>
   <plurals name="viewAllXRounds" comment="viewAllXRounds [one] [other]&#10;&#10;%s is the number of rounds in the Swiss tournament.">
     <item quantity="one">View the round</item>
@@ -34,13 +35,23 @@
   </plurals>
   <string name="tournStartDate">Tournament start date</string>
   <string name="numberOfRounds">Number of rounds</string>
-  <string name="numberOfRoundsHelp">An odd number of rounds allows optimal color balance.</string>
+  <string name="numberOfRoundsHelp">An odd number of rounds allows optimal colour balance.</string>
   <string name="roundInterval">Interval between rounds</string>
   <string name="forbiddenPairings">Forbidden pairings</string>
   <string name="forbiddenPairingsHelp">Usernames of players that must not play together (Siblings, for instance). Two usernames per line, separated by a space.</string>
+  <string name="manualPairings">Manual pairings in next round</string>
+  <string name="manualPairingsHelp">Specify all pairings of the next round manually. One player pair per line. Example:
+PlayerA PlayerB
+PlayerC PlayerD
+To give a bye (1 point) to a player instead of a pairing, add a line like so:
+PlayerE 1
+Missing players will be considered absent and get zero points.
+Leave this field empty to let lichess create pairings automatically.</string>
+  <string name="mustHavePlayedTheirLastSwissGame">Must have played their last swiss game</string>
+  <string name="mustHavePlayedTheirLastSwissGameHelp">Only let players join if they have played their last swiss game. If they failed to show up in a recent swiss event, they won't be able to enter yours. This results in a better swiss experience for the players who actually show up.</string>
   <string name="newSwiss">New Swiss tournament</string>
-  <string name="swissVsArenaQ">When to use swiss tournaments instead of arenas?</string>
-  <string name="swissVsArenaA">In a swiss tournament, all participants play the same number of games, and can only play each other once.
+  <string name="swissVsArenaQ">When to use Swiss tournaments instead of arenas?</string>
+  <string name="swissVsArenaA">In a Swiss tournament, all participants play the same number of games, and can only play each other once.
 It can be a good option for clubs and official tournaments.</string>
   <string name="pointsCalculationQ">How are points calculated?</string>
   <string name="pointsCalculationA">A win is worth one point, a draw is a half point, and a loss is zero points.
@@ -62,19 +73,19 @@ We think these conditions are more likely to be met within a team than in global
   <string name="numberOfByesA">A player gets a bye of one point every time the pairing system can't find a pairing for them.
 Additionally, a single bye of half a point is attributed when a player late-joins a tournament.</string>
   <string name="earlyDrawsQ">What happens with early draws?</string>
-  <string name="earlyDrawsAnswer">In swiss games, players cannot draw before 30 moves are played. While this measure cannot prevent pre-arranged draws, it at least makes it harder to agree to a draw on the fly.</string>
+  <string name="earlyDrawsAnswer">In Swiss games, players cannot draw before 30 moves are played. While this measure cannot prevent pre-arranged draws, it at least makes it harder to agree to a draw on the fly.</string>
   <string name="whatIfOneDoesntPlayQ">What happens if a player doesn't play a game?</string>
   <string name="whatIfOneDoesntPlayA">Their clock will tick, they will flag, and lose the game.
 Then the system will withdraw the player from the tournament, so they don't lose more games.
  They can re-join the tournament at any time.</string>
   <string name="protectionAgainstNoShowQ">What is done regarding no-shows?</string>
-  <string name="protectionAgainstNoShowA">Players who sign up for swiss events but don't play their games can be problematic.
+  <string name="protectionAgainstNoShowA">Players who sign up for Swiss events but don't play their games can be problematic.
 To alleviate this issue, Lichess prevents players who failed to play a game from joining a new Swiss event for a given amount of time.
 The creator of a Swiss event can decide to let them join the event anyway.</string>
   <string name="lateJoinQ">Can players late-join?</string>
-  <string name="lateJoinA">Yes, until more than half the rounds have started; for example in a 11-rounds swiss players can join before round 6 starts and in a 12-rounds before round 7 starts.
+  <string name="lateJoinA">Yes, until more than half the rounds have started; for example in a 11-rounds Swiss, players can join before round 6 starts and in a 12-rounds before round 7 starts.
 Late joiners get a single bye, even if they missed several rounds.</string>
-  <string name="willSwissReplaceArenasQ">Will swiss replace arena tournaments?</string>
+  <string name="willSwissReplaceArenasQ">Will Swiss replace arena tournaments?</string>
   <string name="willSwissReplaceArenasA">No. They're complementary features.</string>
   <string name="roundRobinQ">What about Round Robin?</string>
   <string name="roundRobinA">We'd like to add it, but unfortunately Round Robin doesn't work online.
@@ -84,7 +95,7 @@ The closest you can get to Round Robin online is to play a Swiss tournament with
   <string name="otherSystemsA">We don't plan to add more tournament systems to Lichess at the moment.</string>
   <string name="swissDescription">In a Swiss tournament %1$s, each competitor does not necessarily play all other entrants. Competitors meet one-on-one in each round and are paired using a set of rules designed to ensure that each competitor plays opponents with a similar running score, but not the same opponent more than once. The winner is the competitor with the highest aggregate points earned in all rounds. All competitors play in each round unless there is an odd number of players.</string>
   <string name="teamOnly">Swiss tournaments can only be created by team leaders, and can only be played by team members.
-%1$s to start playing in swiss tournaments.</string>
+%1$s to start playing in Swiss tournaments.</string>
   <string name="joinOrCreateTeam">Join or create a team</string>
   <string name="nowPlaying">Now playing</string>
   <string name="startingSoon">Starting soon</string>
@@ -114,4 +125,7 @@ The closest you can get to Round Robin online is to play a Swiss tournament with
   <string name="predefinedUsers">Only allow pre-defined users to join</string>
   <string name="forbiddedUsers">If this list is non-empty, then users absent from this list will be forbidden to join. One username per line.</string>
   <string name="playYourGames">Play your games</string>
+  <string name="byes">Byes</string>
+  <string name="absences">Absences</string>
+  <string name="tieBreak">Tie Break</string>
 </resources>

@@ -1,19 +1,19 @@
 package lila.security
 
-import play.api.Mode
 import play.api.data.*
 import play.api.data.Forms.*
 import play.api.data.validation.Constraints
 import play.api.mvc.RequestHeader
 
-import lila.common.{ EmailAddress, Form as LilaForm, LameName }
 import lila.common.Form.*
-import lila.user.User.{ ClearPassword, TotpToken }
-import lila.user.{ TotpSecret, User, UserRepo, Me }
+import lila.common.{ Form as LilaForm, LameName }
+import lila.core.security.ClearPassword
+import lila.user.TotpSecret.{ base32, verify }
+import lila.user.{ TotpSecret, TotpToken }
 
 final class SecurityForm(
-    userRepo: UserRepo,
-    authenticator: lila.user.Authenticator,
+    userRepo: lila.user.UserRepo,
+    authenticator: Authenticator,
     emailValidator: EmailAddressValidator,
     lameNameCheck: LameNameCheck,
     hcaptcha: Hcaptcha
@@ -22,14 +22,15 @@ final class SecurityForm(
   import SecurityForm.*
 
   private val newPasswordField =
-    text(minLength = 4, maxLength = 999).verifying(PasswordCheck.newConstraint)
+    nonEmptyText(minLength = 4, maxLength = 999).verifying(PasswordCheck.newConstraint)
   private def newPasswordFieldForMe(using me: Me) =
-    newPasswordField.verifying(PasswordCheck.sameConstraint(me.username into UserStr))
+    newPasswordField.verifying(PasswordCheck.sameConstraint(me.username.into(UserStr)))
 
   private val anyEmail: Mapping[EmailAddress] =
     LilaForm
       .cleanNonEmptyText(minLength = 6, maxLength = EmailAddress.maxLength)
       .verifying(Constraints.emailAddress)
+      .verifying("error.email", EmailAddress.isValid)
       .into[EmailAddress]
 
   private val sendableEmail = anyEmail.verifying(emailValidator.sendableConstraint)
@@ -45,28 +46,27 @@ final class SecurityForm(
       .bindFromRequest()
       .fold(_ => funit, emailValidator.preloadDns)
 
-  object signup:
+  object signup extends lila.core.security.SignupForm:
 
-    val emailField = fullyValidEmail(using none)
+    val emailField: Mapping[EmailAddress] = fullyValidEmail(using none)
 
-    val username = LilaForm.cleanNonEmptyText
+    val username: Mapping[UserName] = LilaForm
+      .cleanNonEmptyText(minLength = 2, maxLength = 20)
       .verifying(
-        Constraints minLength 2,
-        Constraints maxLength 20,
         Constraints.pattern(
-          regex = User.newUsernamePrefix,
+          regex = lila.user.nameRules.newUsernamePrefix,
           error = "usernamePrefixInvalid"
         ),
         Constraints.pattern(
-          regex = User.newUsernameSuffix,
+          regex = lila.user.nameRules.newUsernameSuffix,
           error = "usernameSuffixInvalid"
         ),
         Constraints.pattern(
-          regex = User.newUsernameChars,
+          regex = lila.user.nameRules.newUsernameChars,
           error = "usernameCharsInvalid"
         ),
         Constraints.pattern(
-          regex = User.newUsernameLetters,
+          regex = lila.user.nameRules.newUsernameLetters,
           error = "usernameCharsInvalid"
         )
       )
@@ -74,7 +74,7 @@ final class SecurityForm(
       .verifying("usernameUnacceptable", u => !lameNameCheck.value || !LameName.username(u))
       .verifying(
         "usernameAlreadyUsed",
-        u => !User.isGhost(u.id) && !userRepo.exists(u).await(3 seconds, "signupUsername")
+        u => u.id.noGhost && !userRepo.exists(u).await(3 seconds, "signupUsername")
       )
 
     private val agreementBool = boolean.verifying(b => b)
@@ -86,8 +86,8 @@ final class SecurityForm(
       "policy"     -> agreementBool
     )(AgreementData.apply)(unapply)
 
-    def website(using RequestHeader) = hcaptcha.form(
-      Form(
+    def website(using RequestHeader) = hcaptcha.form:
+      Form:
         mapping(
           "username"  -> username,
           "password"  -> newPasswordField,
@@ -95,26 +95,21 @@ final class SecurityForm(
           "agreement" -> agreement,
           "fp"        -> optional(nonEmptyText)
         )(SignupData.apply)(_ => None)
-          .verifying(PasswordCheck.errorSame, x => mode != Mode.Prod || x.password != x.username.value)
-      )
-    )
+          .verifying(PasswordCheck.errorSame, x => mode.notProd || x.password != x.username.value)
 
-    val mobile = Form(
+    val mobile = Form:
       mapping(
         "username" -> username,
         "password" -> newPasswordField,
         "email"    -> emailField
       )(MobileSignupData.apply)(_ => None)
-        .verifying(PasswordCheck.errorSame, x => mode != Mode.Prod || x.password != x.username.value)
-    )
+        .verifying(PasswordCheck.errorSame, x => mode.notProd || x.password != x.username.value)
 
-  def passwordReset(using RequestHeader) = hcaptcha.form(
-    Form(
+  def passwordReset(using RequestHeader) = hcaptcha.form:
+    Form:
       mapping(
         "email" -> sendableEmail // allow unacceptable emails for BC
       )(PasswordReset.apply)(_ => None)
-    )
-  )
 
   case class PasswordResetConfirm(newPasswd1: String, newPasswd2: String):
     def samePasswords = newPasswd1 == newPasswd2
@@ -157,7 +152,7 @@ final class SecurityForm(
       Form(
         mapping(
           "passwd" -> passwordMapping(candidate),
-          "email"  -> fullyValidEmail.verifying(emailValidator differentConstraint old)
+          "email"  -> fullyValidEmail.verifying(emailValidator.differentConstraint(old))
         )(ChangeEmail.apply)(unapply)
       ).fillOption(old.map { ChangeEmail("", _) })
 
@@ -193,11 +188,11 @@ final class SecurityForm(
 
   def fixEmail(old: EmailAddress) =
     Form(
-      single("email" -> fullyValidEmail(using none).verifying(emailValidator differentConstraint old.some))
+      single("email" -> fullyValidEmail(using none).verifying(emailValidator.differentConstraint(old.some)))
     ).fill(old)
 
   def modEmail(user: User) = Form(
-    single("email" -> anyEmail.verifying(emailValidator uniqueConstraint user.some))
+    single("email" -> anyEmail.verifying(emailValidator.uniqueConstraint(user.some)))
   )
 
   private def passwordProtected(using Me) =
@@ -216,7 +211,7 @@ final class SecurityForm(
       )(Reopen.apply)(_ => None)
   )
 
-  private def passwordMapping(candidate: User.LoginCandidate) =
+  private def passwordMapping(candidate: LoginCandidate) =
     text.verifying("incorrectPassword", p => candidate.check(ClearPassword(p)))
 
 object SecurityForm:
@@ -228,21 +223,27 @@ object SecurityForm:
       policy: Boolean
   )
 
+  trait AnySignupData:
+    def username: UserName
+    def email: EmailAddress
+    def fp: Option[String]
+
   case class SignupData(
       username: UserName,
       password: String,
       email: EmailAddress,
       agreement: AgreementData,
       fp: Option[String]
-  ):
-    def fingerPrint   = FingerPrint from fp.filter(_.nonEmpty)
-    def clearPassword = User.ClearPassword(password)
+  ) extends AnySignupData:
+    def fingerPrint   = FingerPrint.from(fp.filter(_.nonEmpty))
+    def clearPassword = ClearPassword(password)
 
   case class MobileSignupData(
       username: UserName,
       password: String,
       email: EmailAddress
-  )
+  ) extends AnySignupData:
+    def fp = none
 
   case class PasswordReset(email: EmailAddress)
 
@@ -253,4 +254,4 @@ object SecurityForm:
   case class ChangeEmail(passwd: String, email: EmailAddress)
 
   case class TwoFactor(secret: String, passwd: String, token: String):
-    def tokenValid = TotpSecret(secret).verify(User.TotpToken(token))
+    def tokenValid = TotpSecret.decode(secret).verify(TotpToken(token))

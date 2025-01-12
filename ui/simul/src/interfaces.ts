@@ -5,7 +5,6 @@ export interface SimulOpts {
   $side: Cash;
   socketVersion: number;
   chat: any;
-  i18n: I18nDict;
   showRatings: boolean;
   socketSend: SocketSend;
 }
@@ -42,6 +41,7 @@ export interface Player extends LightUserOnline {
 
 export interface Host extends LightUserOnline {
   rating: number;
+  provisional?: boolean;
   gameId?: string;
 }
 

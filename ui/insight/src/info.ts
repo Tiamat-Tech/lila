@@ -1,16 +1,18 @@
 import * as licon from 'common/licon';
 import { onInsert } from 'common/snabbdom';
 import { numberFormat } from 'common/number';
-import userLink from 'common/userLink';
+import { userLink } from 'common/userLink';
 import { h } from 'snabbdom';
-import Ctrl from './ctrl';
+import type Ctrl from './ctrl';
+import { registerFormHandler } from './insight';
+import { spinnerHtml } from 'common/spinner';
 
 const shareStates = ['nobody', 'friends only', 'everybody'];
 
 export default function (ctrl: Ctrl) {
   const shareText = 'Shared with ' + shareStates[ctrl.user.shareId] + '.';
   return h('div.info.box', [
-    h('div.top', userLink(ctrl.user.name, ctrl.user.title, ctrl.user.patron)),
+    h('div.top', userLink(ctrl.user)),
     h('div.content', [
       h('p', ['Insights over ', h('strong', numberFormat(ctrl.user.nbGames)), ' rated games.']),
       h(
@@ -20,7 +22,7 @@ export default function (ctrl: Ctrl) {
               'a',
               {
                 attrs: {
-                  href: '/account/preferences/site',
+                  href: '/account/preferences/privacy#shareYourInsightsData',
                   target: '_blank',
                   rel: 'noopener',
                 },
@@ -42,14 +44,14 @@ export default function (ctrl: Ctrl) {
                   action: `/insights/refresh/${ctrl.env.user.id}`,
                   method: 'post',
                 },
-                hook: onInsert(_el => lichess.refreshInsightForm()),
+                hook: onInsert(_el => registerFormHandler()),
               },
               [
                 h('button.button.text', { attrs: { 'data-icon': licon.Checkmark } }, 'Update insights'),
                 h(
                   'div.crunching.none',
                   {
-                    hook: onInsert(el => el.insertAdjacentHTML('afterbegin', lichess.spinnerHtml)),
+                    hook: onInsert(el => el.insertAdjacentHTML('afterbegin', spinnerHtml)),
                   },
                   [h('br'), h('p', h('strong', 'Now crunching data just for you!'))],
                 ),
