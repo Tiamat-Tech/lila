@@ -6,7 +6,7 @@ object BuildSettings {
   import Dependencies._
 
   val lilaVersion        = "4.0"
-  val globalScalaVersion = "3.6.2"
+  val globalScalaVersion = "3.6.3"
 
   def buildSettings =
     Defaults.coreDefaultSettings ++ Seq(
@@ -57,6 +57,8 @@ object BuildSettings {
     "-language:implicitConversions",
     "-release:21"
     // "-Wunused:all",
+    // "-Yprofile-enabled",
+    // "-Yprofile-trace:compiler.trace"
   )
 
   val srcMain = Seq(

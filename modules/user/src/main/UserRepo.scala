@@ -5,7 +5,7 @@ import com.roundeights.hasher.Implicits.*
 import reactivemongo.api.*
 import reactivemongo.api.bson.*
 import scalalib.ThreadLocalRandom
-import scalalib.model.Days
+import scalalib.model.{ Days, LangTag }
 
 import lila.core.LightUser
 import lila.core.email.NormalizedEmailAddress
@@ -238,7 +238,7 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
       blind: Boolean,
       mobileApiVersion: Option[ApiVersion],
       mustConfirmEmail: Boolean,
-      lang: Option[String] = None
+      lang: Option[LangTag] = None
   ): Fu[Option[User]] =
     exists(name).not.flatMapz {
       val doc = newUser(name, passwordHash, email, blind, mobileApiVersion, mustConfirmEmail, lang) ++
@@ -246,7 +246,7 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
       coll.insert.one(doc) >> byId(name.id)
     }
 
-  def exists[U](id: U)(using uid: UserIdOf[U]): Fu[Boolean] = coll.exists($id(uid(id)))
+  def exists[U: UserIdOf](u: U): Fu[Boolean] = coll.exists($id(u.id))
 
   def filterExists(ids: Set[UserId]): Fu[List[UserId]] =
     coll.primitive[UserId]($inIds(ids), F.id)
@@ -338,14 +338,15 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
         .void
         .recover(lila.db.recoverDuplicateKey(_ => ()))
 
-  def disable(user: User, keepEmail: Boolean): Funit =
+  def disable(user: User, keepEmail: Boolean, forever: Boolean): Funit =
+    val sets   = $doc(F.enabled -> false).++(forever.so($doc(F.foreverClosed -> true)))
+    val unsets = List(F.roles.some, keepEmail.option(F.mustConfirmEmail)).flatten
     coll.update
       .one(
         $id(user.id),
-        $set(F.enabled -> false) ++ $unset(F.roles) ++ {
-          if keepEmail then $unset(F.mustConfirmEmail)
-          else $doc("$rename" -> $doc(F.email -> F.prevEmail))
-        }
+        $doc("$set" -> sets) ++
+          $unset(unsets) ++
+          keepEmail.not.so($doc("$rename" -> $doc(F.email -> F.prevEmail)))
       )
       .void
 
@@ -368,11 +369,13 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
         salt,
         bpass,
         "mustConfirmEmail",
-        colorIt
+        colorIt,
+        F.foreverClosed,
+        F.delete
       )
       coll.update.one(
         $id(user.id),
-        $unset(fields) ++ $set(s"${F.delete}.done" -> true)
+        $unset(fields) ++ $set("deletedAt" -> nowInstant)
       )
 
     def nowFully(user: User) = for
@@ -380,21 +383,22 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
       _ <- coll.update.one(
         $id(user.id),
         $doc(
-          "prevEmail"         -> lockEmail,
-          "createdAt"         -> user.createdAt,
-          s"${F.delete}.done" -> true
+          "prevEmail" -> lockEmail,
+          "createdAt" -> user.createdAt,
+          "deletedAt" -> nowInstant
         )
       )
     yield ()
 
-    def findNextScheduled(delay: FiniteDuration): Fu[Option[(User, UserDelete)]] =
+    def findNextScheduled: Fu[Option[(User, UserDelete)]] =
+      val requestedAt = nowInstant.minusDays(lila.core.user.UserDelete.delay.value)
       coll
         .find:
-          $doc( // hits the delete.scheduled_1 index
-            s"${F.delete}.scheduled".$lt(nowInstant.minusMillis(delay.toMillis)),
+          $doc( // hits the delete.requested_1 index
+            s"${F.delete}.requested".$lt(requestedAt),
             s"${F.delete}.done" -> false
           )
-        .sort($doc(s"${F.delete}.scheduled" -> 1))
+        .sort($doc(s"${F.delete}.requested" -> 1))
         .one[User]
         .flatMapz: user =>
           coll.primitiveOne[UserDelete]($id(user.id), F.delete).mapz(delete => (user -> delete).some)
@@ -527,11 +531,10 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
   def mustConfirmEmail(id: UserId): Fu[Boolean] =
     coll.exists($id(id) ++ $doc(F.mustConfirmEmail.$exists(true)))
 
-  def setEmailConfirmed(id: UserId): Fu[Option[EmailAddress]] =
-    coll.update.one($id(id) ++ $doc(F.mustConfirmEmail.$exists(true)), $unset(F.mustConfirmEmail)).flatMap {
-      res =>
-        (res.nModified == 1).so(email(id))
-    }
+  def setEmailConfirmed(id: UserId): Fu[Option[EmailAddress]] = for
+    res   <- coll.update.one($id(id) ++ $doc(F.mustConfirmEmail.$exists(true)), $unset(F.mustConfirmEmail))
+    email <- (res.nModified == 1).so(email(id))
+  yield email
 
   def setFlair(user: User, flair: Option[Flair]): Funit =
     coll.updateOrUnsetField($id(user.id), F.flair, flair).void
@@ -543,19 +546,12 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
     user.enabled.no.so:
       coll.exists($id(user.id) ++ $doc(s"${F.delete}.done" -> true))
 
+  def isForeverClosed(user: User): Fu[Boolean] =
+    user.enabled.no.so:
+      coll.exists($id(user.id) ++ $doc(F.foreverClosed -> true))
+
   def filterClosedOrInactiveIds(since: Instant)(ids: Iterable[UserId]): Fu[List[UserId]] =
     coll.distinctEasy[UserId, List](F.id, $inIds(ids) ++ $or(disabledSelect, F.seenAt.$lt(since)), _.sec)
-
-  def trustable(id: UserId): Fu[Boolean] = coll.exists:
-    $doc(
-      F.id -> id,
-      $or(
-        F.title.$exists(true),
-        patronSelect,
-        $doc(F.createdAt.$lt(nowInstant.minusDays(15))),
-        $doc(s"${F.count}.lossH".$gt(10))
-      )
-    )
 
   private val defaultCount = lila.core.user.Count(0, 0, 0, 0, 0, 0, 0, 0, 0)
 
@@ -566,7 +562,7 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
       blind: Boolean,
       mobileApiVersion: Option[ApiVersion],
       mustConfirmEmail: Boolean,
-      lang: Option[String]
+      lang: Option[LangTag]
   ) =
     val normalizedEmail = email.normalize
     val now             = nowInstant

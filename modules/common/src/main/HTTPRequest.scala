@@ -67,9 +67,11 @@ object HTTPRequest:
 
   private val crawlerMatcher = UaMatcher:
     // spiders/crawlers
-    """Googlebot|AdsBot|Google-Read-Aloud|bingbot|BingPreview|facebookexternalhit|meta-externalagent|SemrushBot|AhrefsBot|PetalBot|Applebot|YandexBot|YandexAdNet|Twitterbot|Baiduspider|Amazonbot|Bytespider|yacybot|ImagesiftBot|ChatGLM-Spider|YisouSpider""" +
+    """Googlebot|GoogleOther|AdsBot|Google-Read-Aloud|bingbot|BingPreview|facebookexternalhit|meta-externalagent|SemrushBot|AhrefsBot|PetalBot|Applebot|YandexBot|YandexAdNet|YandexImages|Twitterbot|Baiduspider|Amazonbot|Bytespider|yacybot|ImagesiftBot|ChatGLM-Spider|YisouSpider|Yeti/""" +
+      // apps and servers that load previews
+      """|Discordbot|WhatsApp""" +
       // http libs
-      """|HeadlessChrome|okhttp|axios|wget|curl|python-requests|aiohttp|commons-httpclient|python-urllib|python-httpx|Nessus"""
+      """|HeadlessChrome|okhttp|axios|undici|wget|curl|python-requests|aiohttp|commons-httpclient|python-urllib|python-httpx|Nessus|imroc/req"""
 
   final class UaMatcher(rStr: String):
     private val pattern                    = rStr.r.pattern
@@ -128,8 +130,9 @@ object HTTPRequest:
   private def isGameExport(req: RequestHeader) =
     "^/@/[\\w-]{2,30}/download$".r.matches(req.path) ||
       "^/(api/games/user|games/export)/[\\w-]{2,30}($|/.+)".r.matches(req.path)
-  private def isStudyExport(req: RequestHeader)  = "^/study/by/[\\w-]{2,30}/export.pgn$".r.matches(req.path)
-  private def isAccountClose(req: RequestHeader) = req.path == "/account/close"
+  private def isStudyExport(req: RequestHeader) = "^/study/by/[\\w-]{2,30}/export.pgn$".r.matches(req.path)
+  private def isAccountClose(req: RequestHeader) =
+    req.path == "/account/close" || req.path == "/account/delete"
 
   def isClosedLoginPath(req: RequestHeader) =
     isDataDump(req) || isAppeal(req) || isStudyExport(req) || isGameExport(req) || isAccountClose(req)

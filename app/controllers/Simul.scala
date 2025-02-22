@@ -53,10 +53,9 @@ final class Simul(env: Env) extends LilaController(env):
     }
 
   private[controllers] def canHaveChat(simul: Sim)(using ctx: Context): Boolean =
-    ctx.kid.no && ctx.noBot &&                    // no public chats for kids or bots
-      ctx.me.fold(HTTPRequest.isHuman(ctx.req)) { // anon can see public chats
-        env.chat.panic.allowed(_)
-      } && simul.conditions.teamMember
+    ctx.kid.no && ctx.noBot && // no public chats for kids or bots
+      (ctx.isAuth || HTTPRequest.isHuman(ctx.req)) &&
+      simul.conditions.teamMember
         .map(_.teamId)
         .forall: teamId =>
           ctx.userId.exists:
@@ -99,7 +98,7 @@ final class Simul(env: Env) extends LilaController(env):
     NoLameOrBot:
       Ok.async:
         env.team.api
-          .lightsByTourLeader(me)
+          .lightsOf(me)
           .map: teams =>
             views.simul.form.create(forms.create(teams), teams)
   }
@@ -107,7 +106,7 @@ final class Simul(env: Env) extends LilaController(env):
   def create = AuthBody { ctx ?=> me ?=>
     NoLameOrBot:
       env.team.api
-        .lightsByTourLeader(me)
+        .lightsOf(me)
         .flatMap: teams =>
           bindForm(forms.create(teams))(
             err => BadRequest.page(views.simul.form.create(err, teams)),
@@ -138,7 +137,7 @@ final class Simul(env: Env) extends LilaController(env):
   def edit(id: SimulId) = Auth { ctx ?=> me ?=>
     AsHost(id): simul =>
       Ok.async:
-        env.team.api.lightsByTourLeader(me).map { teams =>
+        env.team.api.lightsOf(me).map { teams =>
           views.simul.form.edit(forms.edit(teams, simul), teams, simul)
         }
   }
@@ -146,7 +145,7 @@ final class Simul(env: Env) extends LilaController(env):
   def update(id: SimulId) = AuthBody { ctx ?=> me ?=>
     AsHost(id): simul =>
       env.team.api
-        .lightsByTourLeader(me)
+        .lightsOf(me)
         .flatMap: teams =>
           def errPage(err: lila.simul.SimulForm.EitherForm) =
             BadRequest.page(views.simul.form.edit(err, teams, simul))

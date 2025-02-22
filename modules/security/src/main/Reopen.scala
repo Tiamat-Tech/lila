@@ -40,9 +40,16 @@ final class Reopen(
               case Some(prevEmail) if !email.similarTo(prevEmail) =>
                 fuccess(Left("differentEmail" -> "That account has a different email address."))
               case _ =>
-                closedByMod(user).map {
-                  if _ then Left("nope" -> "Sorry, that account can no longer be reopened.")
-                  else Right(user)
+                closedByMod(user).flatMap {
+                  if _ then fuccess(Left("nope" -> "Sorry, that account can no longer be reopened."))
+                  else
+                    userRepo.isForeverClosed(user).map {
+                      if _ then
+                        Left(
+                          "nope" -> "Sorry, but you explicitly requested that your account could never be reopened."
+                        )
+                      else Right(user)
+                    }
                 }
             }
         }
@@ -76,4 +83,4 @@ ${trans.common_orPaste.txt()}"""),
       userRepo.reopen(user.id).inject(user.some)
     }
 
-  private val tokener = LoginToken.makeTokener(tokenerSecret, 20.minutes)
+  private val tokener = StringToken.userId(tokenerSecret, 20.minutes)

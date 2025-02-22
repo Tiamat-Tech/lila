@@ -100,7 +100,7 @@ object RelayTourForm:
           players = players,
           teams = teams,
           spotlight = spotlight.filterNot(_.isEmpty),
-          pinnedStream = pinnedStream,
+          pinnedStream = if Granter(_.StudyAdmin) then pinnedStream else tour.pinnedStream,
           note = note
         )
         .giveOfficialToBroadcasterIf(Granter(_.StudyAdmin))
@@ -111,7 +111,7 @@ object RelayTourForm:
         name = name,
         info = info,
         markup = markup,
-        ownerId = me,
+        ownerIds = NonEmptyList.one(me),
         tier = tier.ifTrue(Granter(_.Relay)),
         active = false,
         live = none,

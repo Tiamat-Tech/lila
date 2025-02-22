@@ -8,7 +8,7 @@ import play.api.libs.json.JsObject
 import reactivemongo.api.bson.Macros.Annotations.Key
 import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.bson.{ BSONDocument, BSONDocumentHandler, BSONDocumentReader }
-import scalalib.model.Days
+import scalalib.model.{ Days, LangTag }
 
 import lila.core.email.*
 import lila.core.id.Flair
@@ -30,7 +30,7 @@ object user:
       createdAt: Instant,
       seenAt: Option[Instant],
       kid: Boolean,
-      lang: Option[String],
+      lang: Option[LangTag],
       plan: Plan,
       flair: Option[Flair] = None,
       totpSecret: Option[TotpSecret] = None,
@@ -51,7 +51,8 @@ object user:
 
     def createdSinceDays(days: Int) = createdAt.isBefore(nowInstant.minusDays(days))
 
-    def realLang: Option[Lang] = lang.flatMap(Lang.get)
+    def realLang: Option[Lang] = lang.flatMap: tag =>
+      Lang.get(tag.value)
 
     def hasTitle: Boolean = title.exists(PlayerTitle.BOT != _)
 
@@ -161,9 +162,10 @@ object user:
 
   case class ChangeEmail(id: UserId, email: EmailAddress)
 
-  case class UserDelete(user: User, erase: Boolean):
+  case class UserDelete(user: User):
     export user.id
-  object UserDelete extends bus.GivenChannel[UserDelete]("userDelete")
+  object UserDelete extends bus.GivenChannel[UserDelete]("userDelete"):
+    val delay = scalalib.model.Days(7)
 
   trait UserApi:
     def byId[U: UserIdOf](u: U): Fu[Option[User]]
