@@ -1,7 +1,6 @@
 package lila.common
 
 import scalalib.StringUtils.{ escapeHtmlRaw, escapeHtmlRawInPlace }
-import scalatags.Text.all.*
 
 import java.lang.Character.isLetterOrDigit
 import java.lang.{ Math, StringBuilder as jStringBuilder }
@@ -123,7 +122,7 @@ object RawHtml:
                 if (end < sArr.length && sArr(end) == '"') || !expandImg then None
                 else imgUrl(url)
               }.getOrElse {
-                s"""<a rel="nofollow noopener noreferrer" href="$url" target="_blank">$text</a>"""
+                s"""<a rel="nofollow noreferrer" href="$url" target="_blank">$text</a>"""
               }
           }
 

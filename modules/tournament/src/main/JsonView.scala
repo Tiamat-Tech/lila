@@ -76,16 +76,14 @@ final class JsonView(
       )
       playerInfoJson <- playerInfoExt.soFu:
         playerInfoExtended(tour, _)
-      verdicts <- full.so:
+      verdicts <- full.soFu:
         (me, myInfo) match
-          case (None, _)                                   => fuccess(tour.conditions.accepted.some)
-          case (Some(_), Some(myInfo)) if !myInfo.withdraw => fuccess(tour.conditions.accepted.some)
-          case (Some(me), Some(_)) => verify.rejoin(tour.conditions)(using me).dmap(some)
+          case (None, _)                                   => fuccess(tour.conditions.accepted)
+          case (Some(_), Some(myInfo)) if !myInfo.withdraw => fuccess(tour.conditions.accepted)
+          case (Some(me), Some(_))                         => verify.rejoin(tour.conditions)(using me)
           case (Some(me), None) =>
-            userApi
-              .usingPerfOf(me, tour.perfType):
-                verify(tour.conditions, tour.perfType)(using me)
-              .dmap(some)
+            userApi.usingPerfOf(me, tour.perfType):
+              verify(tour.conditions, tour.perfType)(using me)
       stats       <- statsApi(tour)
       shieldOwner <- full.so { shieldApi.currentOwner(tour) }
       teamsToJoinWith <- full.so(~(for u <- me; battle <- tour.teamBattle
@@ -119,7 +117,7 @@ final class JsonView(
           .add("noStreak" -> tour.noStreak)
           .add("position" -> tour.position.ifTrue(full).map(position))
           .add("verdicts" -> verdicts.map(verdictsFor(_, tour.perfType)))
-          .add("schedule" -> tour.schedule.map(scheduleJson))
+          .add("schedule" -> tour.scheduleData.map(scheduleJson))
           .add("private" -> tour.isPrivate)
           .add("quote" -> tour.isCreated.option(lila.quote.Quote.one(tour.id.value)))
           .add("defender" -> shieldOwner)
@@ -140,6 +138,8 @@ final class JsonView(
           .add[Condition.RatingCondition]("minRating", tour.conditions.minRating)
           .add[Condition.RatingCondition]("maxRating", tour.conditions.maxRating)
           .add("minRatedGames", tour.conditions.nbRatedGame)
+          .add("botsAllowed", tour.conditions.bots.exists(_.allowed))
+          .add("minAccountAgeInDays", tour.conditions.accountAge.map(_.days))
           .add("onlyTitled", tour.conditions.titled.isDefined)
           .add("teamMember", tour.conditions.teamMember.map(_.teamId))
           .add("allowList", withAllowList.so(tour.conditions.allowList).map(_.userIds))
@@ -549,10 +549,10 @@ object JsonView:
       .add("scores", withScores.option(s.scoresToString))
       .add("fire", streakFire && s.isOnFire)
 
-  private[tournament] def scheduleJson(s: Schedule) =
+  private[tournament] def scheduleJson(freq: Schedule.Freq, speed: Schedule.Speed) =
     Json.obj(
-      "freq"  -> s.freq.name,
-      "speed" -> s.speed.key
+      "freq"  -> freq.name,
+      "speed" -> speed.key
     )
 
   given OWrites[chess.Clock.Config] = OWrites: clock =>

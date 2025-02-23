@@ -36,7 +36,7 @@
     "debounce-promise": "^3.1.2",
     "emoji-mart": "^5.6.0",
     "flatpickr": "^4.6.13",
-    "lichess-pgn-viewer": "^2.3.0",
+    "lichess-pgn-viewer": "^2.4.0",
     "prop-types": "^15.8.1",
     "qrcode": "^1.5.4",
     "shepherd.js": "^11.2.0",
@@ -44,10 +44,15 @@
     "zxcvbn": "^4.4.2"
   },
   "build": {
-    "bundle": "src/bits.*ts",
+    "bundle": [
+      "src/bits!(*.inline).ts",
+      {
+        "inline": "src/bits.oauth.inline.ts"
+      }
+    ],
     "sync": {
-      "node_modules/cropperjs/dist/cropper.min.css": "public/npm",
-      "../../node_modules/chessground/dist/chessground.min.js": "public/npm"
+      "node_modules/cropperjs/dist/cropper.min.css": "/public/npm",
+      "/node_modules/chessground/dist/chessground.min.js": "/public/npm"
     }
   }
 }

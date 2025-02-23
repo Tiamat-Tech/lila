@@ -3,7 +3,6 @@ package lila.core.lilaism
 import alleycats.Zero
 import com.typesafe.config.Config
 import scalalib.future.FutureAfter
-import java.util.Base64
 import java.util.concurrent.TimeUnit
 import scala.collection.BuildFrom
 import scala.concurrent.{ ExecutionContext as EC, Future }
@@ -103,8 +102,6 @@ trait LilaLibraryExtensions extends CoreExports:
     def parallelVoid(using Executor): Fu[Unit] =
       list.iterator
         .foldLeft(fuccess(()))((fr, fa) => fr.zipWith(fa)((_, _) => ()))
-
-  extension (self: Array[Byte]) def toBase64 = Base64.getEncoder.encodeToString(self)
 
   extension [A](fua: Fu[A])
 

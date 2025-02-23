@@ -5,7 +5,7 @@ import reactivemongo.api.*
 import reactivemongo.api.bson.*
 
 import chess.IntRating
-import lila.core.i18n.Language
+import scalalib.model.Language
 import lila.core.perf.UserWithPerfs
 import lila.core.timeline.{ Propagate, UblogPostLike }
 import lila.db.dsl.{ *, given }
@@ -26,6 +26,12 @@ object UblogRank:
       else if user.hasTitle || user.perfs.standard.glicko.establishedIntRating.exists(_ > IntRating(2200))
       then Tier.NORMAL
       else Tier.LOW
+
+    def defaultWithoutPerfs(user: User) =
+      if user.marks.troll then Tier.HIDDEN
+      else if user.hasTitle then Tier.NORMAL
+      else Tier.LOW
+
     val options = List(
       HIDDEN  -> "Hidden",
       VISIBLE -> "Unlisted",
@@ -122,7 +128,7 @@ final class UblogRank(colls: UblogColls)(using Executor, akka.stream.Materialize
             yield (id, likes, liveAt, tier, language, title, hasImage, adjust)
           .flatMap:
             case None => fuccess(UblogPost.Likes(0))
-            case Some((id, likes, liveAt, tier, language, title, hasImage, adjust)) =>
+            case Some(id, likes, liveAt, tier, language, title, hasImage, adjust) =>
               // Multiple updates may race to set denormalized likes and rank,
               // but values should be approximately correct, match a real like
               // count (though perhaps not the latest one), and any uncontended

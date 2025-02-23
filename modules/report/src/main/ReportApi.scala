@@ -21,9 +21,8 @@ final class ReportApi(
     isOnline: lila.core.socket.IsOnline,
     cacheApi: lila.memo.CacheApi,
     snoozer: lila.memo.Snoozer[Report.SnoozeKey],
-    thresholds: Thresholds,
-    domain: lila.core.config.NetDomain
-)(using Executor, Scheduler)
+    thresholds: Thresholds
+)(using Executor, Scheduler, lila.core.config.NetDomain)
     extends lila.core.report.ReportApi:
 
   import BSONHandlers.given
@@ -284,9 +283,7 @@ final class ReportApi(
     deletedAppeal <- deleteIfAppealInquiry(report)
     _ <- (!deletedAppeal).so:
       doProcessReport($id(report.id), unsetInquiry = true)
-  yield
-    maxScoreCache.invalidateUnit()
-    lila.mon.mod.report.close.increment()
+  yield onReportClose()
 
   def autoProcess(sus: Suspect, rooms: Set[Room])(using MyId): Funit =
     val selector = $doc(
@@ -295,9 +292,11 @@ final class ReportApi(
       "open" -> true
     )
     for _ <- doProcessReport(selector, unsetInquiry = true)
-    yield
-      maxScoreCache.invalidateUnit()
-      lila.mon.mod.report.close.increment()
+    yield onReportClose()
+
+  private def onReportClose() =
+    maxScoreCache.invalidateUnit()
+    lila.mon.mod.report.close.increment()
 
   private def deleteIfAppealInquiry(report: Report)(using me: MyId): Fu[Boolean] =
     if report.isAppealInquiryByMe

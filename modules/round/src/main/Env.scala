@@ -29,7 +29,6 @@ final class Env(
     appConfig: Configuration,
     db: lila.db.Db,
     gameRepo: GameRepo,
-    idGenerator: lila.game.IdGenerator,
     userRepo: lila.user.UserRepo,
     userApi: lila.user.UserApi,
     chatApi: lila.chat.ChatApi,
@@ -46,7 +45,7 @@ final class Env(
     socketKit: lila.core.socket.ParallelSocketKit,
     userLagPut: lila.core.socket.userLag.Put,
     lightUserApi: lila.user.LightUserApi,
-    bookmarkExists: lila.core.bookmark.BookmarkExists,
+    bookmarkExists: lila.core.misc.BookmarkExists,
     simulApiCircularDep: => lila.core.simul.SimulApi,
     settingStore: lila.memo.SettingStore.Builder,
     shutdown: akka.actor.CoordinatedShutdown
@@ -56,7 +55,8 @@ final class Env(
     Executor,
     akka.stream.Materializer,
     lila.core.i18n.Translator,
-    lila.core.config.RateLimit
+    lila.core.config.RateLimit,
+    lila.game.IdGenerator
 ):
 
   private val (botSync, async) = (lightUserApi.isBotSync, lightUserApi.async)

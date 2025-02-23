@@ -40,9 +40,16 @@ final class Reopen(
               case Some(prevEmail) if !email.similarTo(prevEmail) =>
                 fuccess(Left("differentEmail" -> "That account has a different email address."))
               case _ =>
-                closedByMod(user).map {
-                  if _ then Left("nope" -> "Sorry, that account can no longer be reopened.")
-                  else Right(user)
+                closedByMod(user).flatMap {
+                  if _ then fuccess(Left("nope" -> "Sorry, that account can no longer be reopened."))
+                  else
+                    userRepo.isForeverClosed(user).map {
+                      if _ then
+                        Left(
+                          "nope" -> "Sorry, but you explicitly requested that your account could never be reopened."
+                        )
+                      else Right(user)
+                    }
                 }
             }
         }
@@ -73,7 +80,10 @@ ${trans.common_orPaste.txt()}"""),
 
   def confirm(token: String): Fu[Option[User]] =
     tokener.read(token).flatMapz(userRepo.disabledById).flatMapz { user =>
-      userRepo.reopen(user.id).inject(user.some)
+      for _ <- userRepo.reopen(user.id)
+      yield
+        lila.common.Bus.pub(lila.core.security.ReopenAccount(user))
+        user.some
     }
 
-  private val tokener = LoginToken.makeTokener(tokenerSecret, 20.minutes)
+  private val tokener = StringToken.userId(tokenerSecret, 20.minutes)
